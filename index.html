@@ -345,7 +345,7 @@ html,body{
 .mib-val{font-family:var(--mono);font-size:clamp(12px,1.15vw,13px);color:var(--accent);line-height:1.5;overflow-wrap:anywhere}
 .mib-val.secondary{color:var(--accent2);font-size:clamp(11px,1.05vw,12px)}
 .map-nav-card{
-  position:absolute;top:96px;left:12px;width:clamp(156px,34vw,220px);z-index:410;
+  position:absolute;right:76px;bottom:76px;width:clamp(156px,34vw,220px);z-index:410;
   background:rgba(7,10,7,.95);border:1px solid rgba(57,255,106,.24);border-radius:14px;
   box-shadow:0 14px 30px rgba(0,0,0,.32);padding:10px;display:none;touch-action:manipulation
 }
@@ -374,7 +374,7 @@ html,body{
 .map-nav-btn.end{background:rgba(0,201,167,.08);border:1px solid var(--accent2);color:var(--accent2)}
 .map-screen:fullscreen .map-nav-card,
 .map-screen:-ms-fullscreen .map-nav-card,
-.map-screen:-webkit-full-screen .map-nav-card{top:16px;left:16px;z-index:1000}
+.map-screen:-webkit-full-screen .map-nav-card{left:50%;right:auto;bottom:16px;top:auto;transform:translateX(-50%);z-index:1000}
 
 /* ── HISTORY / PIN PANEL (bottom sheet on map) ── */
 .pin-sheet{
@@ -508,7 +508,7 @@ html,body{
   .map-toolbar{padding:8px}
   .map-icon-btn{flex:1 1 calc(50% - 6px);text-align:center}
   .mib-item{min-width:calc(50% - 8px);flex-basis:calc(50% - 8px)}
-  .map-nav-card{top:92px;left:8px;width:clamp(148px,42vw,180px)}
+  .map-nav-card{right:68px;bottom:72px;width:clamp(148px,42vw,180px)}
 }
 
 @media(min-width:768px){
@@ -727,7 +727,7 @@ html,body{
             <div class="map-nav-title">Nav</div>
             <div class="map-nav-sub" id="map-nav-sub">No active route built yet.</div>
           </div>
-          <button class="map-nav-toggle" id="map-nav-toggle" onclick="toggleMapNavCard()">Min</button>
+          <button class="map-nav-toggle" id="map-nav-toggle" onclick="toggleMapNavCard()">▶</button>
         </div>
         <div class="map-nav-grid">
           <div class="result-item secondary"><div class="r-label">Remaining</div><div class="r-value" id="map-nav-distance">—</div></div>
@@ -1316,7 +1316,7 @@ function setMapNavCardMinimized(minimized){
   const btn=document.getElementById('map-nav-toggle');
   if(!card||!btn)return;
   card.classList.toggle('minimized',minimized);
-  btn.textContent=minimized?'Open':'Min';
+  btn.textContent=minimized?'▶':'▼';
 }
 function toggleMapNavCard(){setMapNavCardMinimized(!mapNavMinimized);}
 function updateMapNavCard(nav=lastNavigationResult){

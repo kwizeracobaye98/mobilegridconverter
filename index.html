@@ -345,17 +345,32 @@ html,body{
 .mib-val{font-family:var(--mono);font-size:clamp(12px,1.15vw,13px);color:var(--accent);line-height:1.5;overflow-wrap:anywhere}
 .mib-val.secondary{color:var(--accent2);font-size:clamp(11px,1.05vw,12px)}
 .map-nav-card{
-  position:absolute;top:12px;right:12px;width:min(360px,calc(100% - 24px));z-index:410;
+  position:absolute;top:12px;right:12px;width:min(220px,calc(100% - 24px));z-index:410;
   background:rgba(7,10,7,.95);border:1px solid rgba(57,255,106,.24);border-radius:14px;
-  box-shadow:0 14px 30px rgba(0,0,0,.32);padding:12px;display:none
+  box-shadow:0 14px 30px rgba(0,0,0,.32);padding:10px;display:none;touch-action:manipulation
 }
 .map-nav-card.show{display:block}
-.map-nav-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
-.map-nav-title{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
-.map-nav-sub{font-family:var(--mono);font-size:9px;color:var(--accent2);letter-spacing:.5px;line-height:1.5;margin-top:4px}
-.map-nav-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.map-nav-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.map-nav-actions .convert-btn,.map-nav-actions .show-map-btn,.map-nav-actions .result-map-link{margin-bottom:0;flex:1 1 150px;text-align:center}
+.map-nav-card.minimized .map-nav-grid,.map-nav-card.minimized .map-nav-actions{display:none}
+.map-nav-card.minimized{width:min(160px,calc(100% - 24px));padding:8px 10px}
+.map-nav-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.map-nav-card.minimized .map-nav-head{margin-bottom:0}
+.map-nav-title{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.9px;text-transform:uppercase}
+.map-nav-sub{font-family:var(--mono);font-size:8px;color:var(--accent2);letter-spacing:.4px;line-height:1.4;margin-top:2px}
+.map-nav-toggle{
+  border:1px solid var(--border2);background:transparent;color:var(--muted);border-radius:999px;
+  padding:4px 8px;font-family:var(--mono);font-size:9px;letter-spacing:.8px;cursor:pointer
+}
+.map-nav-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.map-nav-grid .result-item{padding:8px}
+.map-nav-grid .r-value{font-size:13px;line-height:1.25}
+.map-nav-grid .r-label{font-size:9px;margin-bottom:4px}
+.map-nav-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.map-nav-btn{
+  flex:1 1 calc(50% - 3px);border-radius:8px;padding:9px 8px;font-family:var(--mono);font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer
+}
+.map-nav-btn.start{background:rgba(57,255,106,.1);border:1px solid var(--accent);color:var(--accent)}
+.map-nav-btn.end{background:rgba(0,201,167,.08);border:1px solid var(--accent2);color:var(--accent2)}
 
 /* ── HISTORY / PIN PANEL (bottom sheet on map) ── */
 .pin-sheet{
@@ -489,8 +504,7 @@ html,body{
   .map-toolbar{padding:8px}
   .map-icon-btn{flex:1 1 calc(50% - 6px);text-align:center}
   .mib-item{min-width:calc(50% - 8px);flex-basis:calc(50% - 8px)}
-  .map-nav-card{top:8px;right:8px;width:calc(100% - 16px)}
-  .map-nav-grid{grid-template-columns:1fr}
+  .map-nav-card{top:8px;right:8px;width:min(180px,calc(100% - 16px))}
 }
 
 @media(min-width:768px){
@@ -705,20 +719,18 @@ html,body{
       <div class="map-nav-card" id="map-nav-card">
         <div class="map-nav-head">
           <div>
-            <div class="map-nav-title">Navigation Card</div>
+            <div class="map-nav-title">Nav</div>
             <div class="map-nav-sub" id="map-nav-sub">No active route built yet.</div>
           </div>
+          <button class="map-nav-toggle" id="map-nav-toggle" onclick="toggleMapNavCard()">Min</button>
         </div>
         <div class="map-nav-grid">
-          <div class="result-item"><div class="r-label">From</div><div class="r-value" id="map-nav-from">—</div></div>
-          <div class="result-item"><div class="r-label">To</div><div class="r-value" id="map-nav-to">—</div></div>
           <div class="result-item secondary"><div class="r-label">Distance</div><div class="r-value" id="map-nav-distance">—</div></div>
-          <div class="result-item secondary"><div class="r-label">ETA</div><div class="r-value" id="map-nav-time">—</div></div>
+          <div class="result-item secondary"><div class="r-label">Time</div><div class="r-value" id="map-nav-time">—</div></div>
         </div>
         <div class="map-nav-actions">
-          <button class="convert-btn" id="map-nav-start-btn" onclick="startNavigation()">▶ START NAVIGATION</button>
-          <button class="show-map-btn visible inline-action" id="map-nav-end-btn" onclick="endNavigation()" style="display:inline-block">■ END NAVIGATION</button>
-          <a class="result-map-link" id="map-nav-google-link" href="#" target="_blank" rel="noopener">🗺 Google Maps Route</a>
+          <button class="map-nav-btn start" id="map-nav-start-btn" onclick="startNavigation()">Start</button>
+          <button class="map-nav-btn end" id="map-nav-end-btn" onclick="endNavigation()">End</button>
         </div>
       </div>
       <div class="map-info-bar" id="map-info-bar">
@@ -1023,7 +1035,7 @@ let navLegLayer=null,navLegMarkers=[];
 const MINUTES_PER_KM_DAY=20,MINUTES_PER_KM_NIGHT=6.6666667;
 const NAV_SPEEDS={foot:5,vehicle:40};
 let navStartMode='live',navTravelMode='foot',activeNavigation=null,navTicker=null;
-let floatingNavMinimized=false,lastNavPosition=null;
+let floatingNavMinimized=false,mapNavMinimized=false,lastNavPosition=null;
 
 function initMap(){
   if(mapReady)return;
@@ -1098,8 +1110,9 @@ function buildNavVector(start,end){
   const northLabel=`${northMeters>=0?'+':''}${northMeters.toFixed(0)} m N`;
   return`${eastLabel} · ${northLabel}`;
 }
-function drawNavigationLeg(start,end){
+function drawNavigationLeg(start,end,opts={}){
   if(!mapReady)initMap();
+  const shouldFit=opts.fit!==false;
   clearNavLeg();
   navLegLayer=L.polyline([[start.lat,start.lon],[end.lat,end.lon]],{color:'#ffb830',weight:4,opacity:.95,dashArray:'10 6'}).addTo(map);
   const startMarker=L.marker([start.lat,start.lon],{icon:L.divIcon({className:'',html:'<div class="tac-marker tac-cal"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(map);
@@ -1107,7 +1120,7 @@ function drawNavigationLeg(start,end){
   startMarker.bindPopup(`<b style="font-size:13px;color:#ffb830">Start</b><br>GR ${start.gridRef}<br>${start.sheet.name}<br>${start.lat.toFixed(6)}, ${start.lon.toFixed(6)}`);
   endMarker.bindPopup(`<b style="font-size:13px;color:#39ff6a">Destination</b><br>GR ${end.gridRef}<br>${end.sheet.name}<br>${end.lat.toFixed(6)}, ${end.lon.toFixed(6)}`);
   navLegMarkers=[startMarker,endMarker];
-  map.fitBounds(L.latLngBounds([[start.lat,start.lon],[end.lat,end.lon]]),{padding:[30,30]});
+  if(shouldFit)map.fitBounds(L.latLngBounds([[start.lat,start.lon],[end.lat,end.lon]]),{padding:[30,30]});
 }
 function addPin(obj){
   pinCounter++;
@@ -1226,32 +1239,32 @@ function setMapNavCardVisibility(show){
   if(!card)return;
   card.classList.toggle('show',show);
 }
+function setMapNavCardMinimized(minimized){
+  mapNavMinimized=minimized;
+  const card=document.getElementById('map-nav-card');
+  const btn=document.getElementById('map-nav-toggle');
+  if(!card||!btn)return;
+  card.classList.toggle('minimized',minimized);
+  btn.textContent=minimized?'Open':'Min';
+}
+function toggleMapNavCard(){setMapNavCardMinimized(!mapNavMinimized);}
 function updateMapNavCard(nav=lastNavigationResult){
-  const fromEl=document.getElementById('map-nav-from');
-  const toEl=document.getElementById('map-nav-to');
   const distEl=document.getElementById('map-nav-distance');
   const timeEl=document.getElementById('map-nav-time');
   const subEl=document.getElementById('map-nav-sub');
-  const linkEl=document.getElementById('map-nav-google-link');
-  if(!fromEl||!toEl||!distEl||!timeEl||!subEl||!linkEl)return;
+  if(!distEl||!timeEl||!subEl)return;
   if(!nav){
-    fromEl.textContent='—';
-    toEl.textContent='—';
     distEl.textContent='—';
     timeEl.textContent='—';
     subEl.textContent='No active route built yet.';
-    linkEl.href='#';
     setMapNavCardVisibility(false);
     return;
   }
-  fromEl.textContent=nav.startLabel||`${nav.start.sheet.name} · ${nav.start.gridRef}`;
-  toEl.textContent=`${nav.end.sheet.name} · ${nav.end.gridRef}`;
   distEl.textContent=formatDistance(nav.distanceKm);
   timeEl.textContent=formatMinutes(nav.etaMinutes||0);
   subEl.textContent=activeNavigation
     ?`Navigation running · ${activeNavigation.mode==='live'?'Current location':'Manual grid'}`
     :'Route ready on map.';
-  linkEl.href=googleMapsDirectionsUrl(nav.start.lat,nav.start.lon,nav.end.lat,nav.end.lon);
   setMapNavCardVisibility(true);
 }
 function setFloatingNavMinimized(minimized){
@@ -1297,7 +1310,7 @@ function refreshActiveNavigation(){
   document.getElementById('map-nav-time').textContent=timeText;
   document.getElementById('map-nav-sub').textContent=`Navigation running · ${nav.mode==='live'?'Current location':'Manual grid'}`;
   maybeAutoMinimizeFloatingNav(current);
-  if(mapReady&&current&&nav.end)drawNavigationLeg({...nav.start,lat:current.lat,lon:current.lon,gridRef:nav.mode==='live'?'LIVE POSITION':nav.start.gridRef,sheet:nav.start.sheet},nav.end);
+  if(mapReady&&current&&nav.end)drawNavigationLeg({...nav.start,lat:current.lat,lon:current.lon,gridRef:nav.mode==='live'?'LIVE POSITION':nav.start.gridRef,sheet:nav.start.sheet},nav.end,{fit:false});
   if(remainingKm<=0.03){
     updateNavStatusChip('Arrived','active');
     updateFloatingNav(distanceText,'Arrived',bearingText,elapsedText,'Destination reached');
@@ -1313,6 +1326,8 @@ function startNavigation(){
   lastNavPosition=null;
   setFloatingNavVisibility(true);
   setFloatingNavMinimized(false);
+  setMapNavCardVisibility(true);
+  setMapNavCardMinimized(false);
   updateMapNavCard(lastNavigationResult);
   navTicker=setInterval(refreshActiveNavigation,1000);
   refreshActiveNavigation();
@@ -1481,10 +1496,10 @@ function showGridNavigationOnMap(){
     if(map)map.invalidateSize();
     updateMapNavCard(lastNavigationResult);
     if(activeNavigation&&activeNavigation.mode==='live'&&userLatLng){
-      drawNavigationLeg({...activeNavigation.start,lat:userLatLng.lat,lon:userLatLng.lng,gridRef:'LIVE POSITION',sheet:activeNavigation.start.sheet},activeNavigation.end);
+      drawNavigationLeg({...activeNavigation.start,lat:userLatLng.lat,lon:userLatLng.lng,gridRef:'LIVE POSITION',sheet:activeNavigation.start.sheet},activeNavigation.end,{fit:true});
       return;
     }
-    drawNavigationLeg(lastNavigationResult.start,lastNavigationResult.end);
+    drawNavigationLeg(lastNavigationResult.start,lastNavigationResult.end,{fit:true});
   },250);
 }
 

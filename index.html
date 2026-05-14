@@ -160,6 +160,54 @@ html,body{
 .mode-toggle{display:flex;gap:0;margin-bottom:14px;border:1px solid var(--border2);border-radius:8px;overflow:hidden}
 .mode-btn{flex:1;padding:10px;font-family:var(--mono);font-size:10px;letter-spacing:1px;background:transparent;border:none;color:var(--muted);cursor:pointer;text-transform:uppercase;transition:all .15s}
 .mode-btn.active{background:rgba(57,255,106,.15);color:var(--accent);text-shadow:var(--glow)}
+.inline-mode-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.inline-mode-bar .mode-btn{border:1px solid var(--border2);border-radius:8px;flex:1 1 180px}
+.inline-mode-bar .mode-btn.active{border-color:var(--accent)}
+.nav-status{
+  background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;margin-top:12px
+}
+.nav-status-title{font-family:var(--mono);font-size:11px;color:var(--accent2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.nav-status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.nav-status-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.nav-status-actions .convert-btn,
+.nav-status-actions .show-map-btn{margin-bottom:0;flex:1 1 200px}
+.nav-chip{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;
+  border:1px solid var(--border2);font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.6px
+}
+.nav-chip.live{border-color:var(--accent2);color:var(--accent2)}
+.nav-chip.active{border-color:var(--accent);color:var(--accent)}
+.nav-inline-note{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.4px;line-height:1.6;margin-bottom:12px}
+.floating-nav-bar{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + var(--safe-bottom) + 8px);
+  width:min(calc(100% - 16px),var(--app-max));z-index:260;display:none;
+  background:rgba(7,10,7,.97);border:1px solid rgba(57,255,106,.24);border-radius:16px;
+  box-shadow:0 16px 36px rgba(0,0,0,.34),0 0 0 1px rgba(57,255,106,.06);backdrop-filter:blur(10px);
+  overflow:hidden
+}
+.floating-nav-bar.show{display:block}
+.floating-nav-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:12px 14px;background:rgba(57,255,106,.06);border-bottom:1px solid var(--border)
+}
+.floating-nav-title{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:1.1px;text-transform:uppercase}
+.floating-nav-meta{font-family:var(--mono);font-size:10px;color:var(--accent2);letter-spacing:.5px}
+.floating-nav-toggle{
+  border:1px solid var(--border2);background:transparent;color:var(--muted);border-radius:999px;
+  padding:7px 12px;font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer
+}
+.floating-nav-body{padding:12px 14px}
+.floating-nav-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.floating-nav-item{background:rgba(0,0,0,.28);border-radius:10px;padding:10px}
+.floating-nav-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px}
+.floating-nav-value{font-family:var(--mono);font-size:15px;color:var(--accent);line-height:1.35}
+.floating-nav-item.secondary .floating-nav-value{color:var(--accent2);font-size:13px}
+.floating-nav-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.floating-nav-actions .convert-btn,
+.floating-nav-actions .show-map-btn{margin-bottom:0;flex:1 1 180px}
+.floating-nav-bar.minimized .floating-nav-body{display:none}
+.floating-nav-bar.minimized .floating-nav-head{border-bottom:none}
 
 .convert-btn{
   width:100%;padding:16px;background:rgba(57,255,106,.1);border:1px solid var(--accent);
@@ -177,6 +225,7 @@ html,body{
 }
 .show-map-btn.visible{display:block}
 .show-map-btn:active{background:rgba(0,201,167,.2)}
+.show-map-btn.inline-action{display:inline-block;width:auto;min-width:180px;margin-bottom:0}
 
 .err-msg{
   font-family:var(--mono);font-size:11px;color:var(--err);
@@ -224,6 +273,9 @@ html,body{
   border-radius:7px;transition:all .2s;display:inline-block;text-align:center;
 }
 .result-map-link:active{background:rgba(0,201,167,.15)}
+.result-action-stack{padding:0 14px 14px;display:flex;gap:8px;flex-wrap:wrap}
+.result-action-stack .result-map-link,
+.result-action-stack .show-map-btn{flex:1 1 220px;text-align:center}
 
 .steps-toggle{
   width:100%;padding:11px;font-family:var(--mono);font-size:10px;letter-spacing:2px;
@@ -292,6 +344,18 @@ html,body{
 .mib-label{font-family:var(--mono);font-size:clamp(9px,.95vw,10px);color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px;line-height:1.4}
 .mib-val{font-family:var(--mono);font-size:clamp(12px,1.15vw,13px);color:var(--accent);line-height:1.5;overflow-wrap:anywhere}
 .mib-val.secondary{color:var(--accent2);font-size:clamp(11px,1.05vw,12px)}
+.map-nav-card{
+  position:absolute;top:12px;right:12px;width:min(360px,calc(100% - 24px));z-index:410;
+  background:rgba(7,10,7,.95);border:1px solid rgba(57,255,106,.24);border-radius:14px;
+  box-shadow:0 14px 30px rgba(0,0,0,.32);padding:12px;display:none
+}
+.map-nav-card.show{display:block}
+.map-nav-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
+.map-nav-title{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+.map-nav-sub{font-family:var(--mono);font-size:9px;color:var(--accent2);letter-spacing:.5px;line-height:1.5;margin-top:4px}
+.map-nav-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.map-nav-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.map-nav-actions .convert-btn,.map-nav-actions .show-map-btn,.map-nav-actions .result-map-link{margin-bottom:0;flex:1 1 150px;text-align:center}
 
 /* ── HISTORY / PIN PANEL (bottom sheet on map) ── */
 .pin-sheet{
@@ -414,7 +478,9 @@ html,body{
   .result-header{flex-wrap:wrap}
   .dms-row,
   .result-grid,
-  .info-grid{grid-template-columns:1fr}
+  .info-grid,
+  .nav-status-grid,
+  .floating-nav-grid{grid-template-columns:1fr}
   .result-item.gridref{grid-column:1}
   .result-item.gridref .r-value{font-size:18px;letter-spacing:2px}
   .bottom-nav{padding-inline:4px;gap:4px}
@@ -423,6 +489,8 @@ html,body{
   .map-toolbar{padding:8px}
   .map-icon-btn{flex:1 1 calc(50% - 6px);text-align:center}
   .mib-item{min-width:calc(50% - 8px);flex-basis:calc(50% - 8px)}
+  .map-nav-card{top:8px;right:8px;width:calc(100% - 16px)}
+  .map-nav-grid{grid-template-columns:1fr}
 }
 
 @media(min-width:768px){
@@ -432,6 +500,7 @@ html,body{
   .info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .map-toolbar{padding:10px 14px}
   .pin-sheet{left:16px;right:16px;bottom:12px;border:1px solid var(--border2);border-radius:18px;box-shadow:0 18px 36px rgba(0,0,0,.35)}
+  .floating-nav-bar{width:min(calc(100% - 32px),var(--app-max));bottom:calc(var(--nav-h) + var(--safe-bottom) + 12px)}
 }
 
 @media(min-width:1024px){
@@ -447,6 +516,7 @@ html,body{
   .info-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
   .map-toolbar{justify-content:flex-start}
   .map-icon-btn{min-width:80px}
+  .floating-nav-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 </style>
 </head>
@@ -632,6 +702,25 @@ html,body{
       <div class="map-coords-bar" id="map-cursor-coords">Tap map · coordinates appear here</div>
       <div id="ruler-output" class="map-ruler-output" style="display:none">Ruler off</div>
       <div id="tactical-map" style="flex:1;min-height:0"></div>
+      <div class="map-nav-card" id="map-nav-card">
+        <div class="map-nav-head">
+          <div>
+            <div class="map-nav-title">Navigation Card</div>
+            <div class="map-nav-sub" id="map-nav-sub">No active route built yet.</div>
+          </div>
+        </div>
+        <div class="map-nav-grid">
+          <div class="result-item"><div class="r-label">From</div><div class="r-value" id="map-nav-from">—</div></div>
+          <div class="result-item"><div class="r-label">To</div><div class="r-value" id="map-nav-to">—</div></div>
+          <div class="result-item secondary"><div class="r-label">Distance</div><div class="r-value" id="map-nav-distance">—</div></div>
+          <div class="result-item secondary"><div class="r-label">ETA</div><div class="r-value" id="map-nav-time">—</div></div>
+        </div>
+        <div class="map-nav-actions">
+          <button class="convert-btn" id="map-nav-start-btn" onclick="startNavigation()">▶ START NAVIGATION</button>
+          <button class="show-map-btn visible inline-action" id="map-nav-end-btn" onclick="endNavigation()" style="display:inline-block">■ END NAVIGATION</button>
+          <a class="result-map-link" id="map-nav-google-link" href="#" target="_blank" rel="noopener">🗺 Google Maps Route</a>
+        </div>
+      </div>
       <div class="map-info-bar" id="map-info-bar">
         <div class="mib-item"><div class="mib-label">Grid Ref</div><div class="mib-val" id="mib-grid">—</div></div>
         <div class="mib-item"><div class="mib-label">Latitude</div><div class="mib-val" id="mib-lat">—</div></div>
@@ -663,6 +752,80 @@ html,body{
       </div>
     </div>
 
+    <!-- SCREEN: Grid → Grid Nav -->
+    <div class="screen" id="screen-g2g">
+      <div class="section-label">Grid To Grid Navigation</div>
+      <div class="hint-card">
+        <strong>Route workflow</strong>
+        Choose whether navigation starts from your live location or from a manual start grid. The app computes bearing, distance, estimated time, and lets you start or end navigation.
+      </div>
+      <div class="section-label">Start Source</div>
+      <div class="inline-mode-bar">
+        <button class="mode-btn active" id="nav-start-mode-live" onclick="setNavStartMode('live')">Current Location</button>
+        <button class="mode-btn" id="nav-start-mode-grid" onclick="setNavStartMode('grid')">Manual Grid</button>
+      </div>
+      <div class="nav-inline-note" id="nav-live-note">Live start uses your phone GPS as the origin and keeps the navigation leg updated while you move.</div>
+      <div class="field-group">
+        <div class="field" id="nav-start-grid-wrap" style="display:none">
+          <label>Start Grid (6 digits)</label>
+          <input type="text" id="nav-grid-start" inputmode="numeric" maxlength="6" placeholder="e.g. 201515" oninput="this.value=this.value.replace(/\D/g,'');clearErr('g2g')">
+        </div>
+        <div class="field">
+          <label>Destination Grid (6 digits)</label>
+          <input type="text" id="nav-grid-end" inputmode="numeric" maxlength="6" placeholder="e.g. 288612" oninput="this.value=this.value.replace(/\D/g,'');clearErr('g2g')">
+        </div>
+      </div>
+      <div class="section-label">Travel Mode</div>
+      <div class="inline-mode-bar">
+        <button class="mode-btn active" id="nav-travel-foot" onclick="setNavTravelMode('foot')">Foot</button>
+        <button class="mode-btn" id="nav-travel-vehicle" onclick="setNavTravelMode('vehicle')">Vehicle</button>
+      </div>
+      <button class="convert-btn" onclick="convertGridToGrid()">▶ BUILD NAVIGATION LEG</button>
+      <div class="err-msg" id="g2g-err"></div>
+      <div class="result-card" id="g2g-result">
+        <div class="result-header">
+          <span>Grid Navigation Solution</span>
+          <button class="copy-btn" id="g2g-copy" onclick="copyResult('g2g')">⧉ COPY</button>
+        </div>
+        <div class="result-precision" id="g2g-prec"></div>
+        <div class="result-body">
+          <div class="result-grid">
+            <div class="result-item"><div class="r-label">Start Sheet / Grid</div><div class="r-value" id="g2g-start">—</div></div>
+            <div class="result-item"><div class="r-label">Destination Sheet / Grid</div><div class="r-value" id="g2g-end">—</div></div>
+            <div class="result-item secondary"><div class="r-label">Start Coordinates</div><div class="r-value" id="g2g-start-coords">—</div></div>
+            <div class="result-item secondary"><div class="r-label">Destination Coordinates</div><div class="r-value" id="g2g-end-coords">—</div></div>
+            <div class="result-item"><div class="r-label">Distance</div><div class="r-value" id="g2g-distance">—</div></div>
+            <div class="result-item"><div class="r-label">Estimated Time</div><div class="r-value" id="g2g-eta">—</div></div>
+            <div class="result-item"><div class="r-label">Bearing</div><div class="r-value" id="g2g-bearing">—</div></div>
+            <div class="result-item secondary"><div class="r-label">Back Bearing</div><div class="r-value" id="g2g-back-bearing">—</div></div>
+            <div class="result-item secondary"><div class="r-label">Movement Vector</div><div class="r-value" id="g2g-vector">—</div></div>
+          </div>
+        </div>
+        <div class="result-action-stack">
+          <button class="convert-btn" id="nav-start-btn" onclick="startNavigation()">▶ START NAVIGATION</button>
+          <button class="show-map-btn visible inline-action" id="nav-end-btn" onclick="endNavigation()" style="display:inline-block">■ END NAVIGATION</button>
+          <a class="result-map-link" id="g2g-google-link" href="#" target="_blank" rel="noopener">🗺 Google Maps Route</a>
+          <button class="show-map-btn inline-action" id="g2g-map-btn" onclick="showGridNavigationOnMap()">⊕ SHOW LEG ON MAP</button>
+        </div>
+        <div class="nav-status">
+          <div class="nav-status-title">Active Navigation</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <span class="nav-chip" id="nav-chip-state">Idle</span>
+            <span class="nav-chip" id="nav-chip-source">Start: Current location</span>
+            <span class="nav-chip" id="nav-chip-travel">Mode: Foot</span>
+          </div>
+          <div class="nav-status-grid">
+            <div class="result-item"><div class="r-label">Remaining Distance</div><div class="r-value" id="nav-remaining-distance">—</div></div>
+            <div class="result-item"><div class="r-label">Remaining Time</div><div class="r-value" id="nav-remaining-time">—</div></div>
+            <div class="result-item secondary"><div class="r-label">Current Bearing</div><div class="r-value" id="nav-current-bearing">—</div></div>
+            <div class="result-item secondary"><div class="r-label">Elapsed</div><div class="r-value" id="nav-elapsed">—</div></div>
+          </div>
+        </div>
+      </div>
+      <button class="steps-toggle" id="g2g-steps-btn" onclick="toggleSteps('g2g')" style="display:none">Calculation Steps</button>
+      <div class="steps-box" id="g2g-steps"></div>
+    </div>
+
   </div><!-- /screen-wrap -->
 
   <!-- BOTTOM NAV -->
@@ -675,11 +838,37 @@ html,body{
       <span class="nav-icon">◎</span>
       <span>Geo→Grid</span>
     </button>
+    <button class="nav-btn" id="nav-g2g" onclick="switchScreen('g2g')">
+      <span class="nav-icon">⬈</span>
+      <span>Grid Nav</span>
+    </button>
     <button class="nav-btn" id="nav-map" onclick="switchScreen('map')">
       <span class="nav-icon">🗺</span>
       <span>Map</span>
     </button>
   </nav>
+</div>
+
+<div class="floating-nav-bar" id="floating-nav-bar">
+  <div class="floating-nav-head">
+    <div>
+      <div class="floating-nav-title">Live Navigation</div>
+      <div class="floating-nav-meta" id="floating-nav-meta">Idle</div>
+    </div>
+    <button class="floating-nav-toggle" id="floating-nav-toggle" onclick="toggleFloatingNavBar()">Minimize</button>
+  </div>
+  <div class="floating-nav-body">
+    <div class="floating-nav-grid">
+      <div class="floating-nav-item"><div class="floating-nav-label">Remaining</div><div class="floating-nav-value" id="floating-nav-distance">—</div></div>
+      <div class="floating-nav-item"><div class="floating-nav-label">ETA</div><div class="floating-nav-value" id="floating-nav-time">—</div></div>
+      <div class="floating-nav-item secondary"><div class="floating-nav-label">Bearing</div><div class="floating-nav-value" id="floating-nav-bearing">—</div></div>
+      <div class="floating-nav-item secondary"><div class="floating-nav-label">Elapsed</div><div class="floating-nav-value" id="floating-nav-elapsed">—</div></div>
+    </div>
+    <div class="floating-nav-actions">
+      <button class="show-map-btn visible inline-action" onclick="showGridNavigationOnMap()" style="display:inline-block">⊕ SHOW ON MAP</button>
+      <button class="convert-btn" onclick="endNavigation()">■ END NAVIGATION</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -747,6 +936,41 @@ function dec2dms(dec){dec=Math.abs(dec);const d=Math.floor(dec),mFull=(dec-d)*60
 function fmtDMS(d,m,s,hemi,decimals=3){const ss=s.toFixed(decimals);return`${String(d).padStart(2,'0')}°${String(m).padStart(2,'0')}'${ss.padStart(decimals+3,'0')}"${hemi}`;}
 function doGridToGeo(gridStr){if(!/^\d{6}$/.test(gridStr))throw new Error('Must be exactly 6 digits');const gE=parseInt(gridStr.slice(0,3),10),gN=parseInt(gridStr.slice(3,6),10);validateGrid(gE,gN);const{stdE,stdN}=gridToStdTM(gE,gN),{latDeg,lonDeg}=tmStd_toGeo(stdE,stdN),latS=-latDeg,latDMS=dec2dms(latS),lonDMS=dec2dms(lonDeg);return{latS,lonDeg,latDMS,lonDMS,gE,gN,stdE,stdN,gridRef:gridStr};}
 function doGeoToGrid(latS,lonE){validateGeo(latS,lonE);const{stdE,stdN}=geoToTM_std(-latS,lonE),{gE:gE_raw,gN:gN_raw}=stdTMtoGrid(stdE,stdN),gE=Math.round(gE_raw),gN=Math.round(gN_raw);validateGrid(gE,gN);const gridRef=String(gE).padStart(3,'0')+String(gN).padStart(3,'0'),latDMS=dec2dms(latS),lonDMS=dec2dms(lonE);return{gridRef,gE,gN,gE_raw,gN_raw,stdE,stdN,latS,lonE,latDMS,lonDMS};}
+function doGridToGeoOnSheet(gridStr,sheet){
+  if(!/^\d{6}$/.test(gridStr))throw new Error('Must be exactly 6 digits');
+  const gE=parseInt(gridStr.slice(0,3),10),gN=parseInt(gridStr.slice(3,6),10);
+  if(!sheetContainsGrid(sheet,gE,gN))throw new Error(`Grid ${gridStr} outside ${sheet.name}`);
+  const{stdE,stdN}=gridToStdTM(gE,gN,sheet),{latDeg,lonDeg}=tmStd_toGeo(stdE,stdN),latS=-latDeg,latDMS=dec2dms(latS),lonDMS=dec2dms(lonDeg);
+  return{latS,lonDeg,lat:-latS,lon:lonDeg,latDMS,lonDMS,gE,gN,stdE,stdN,gridRef:gridStr,sheet};
+}
+function doGeoToGridOnSheet(latS,lonE,sheet){
+  if(!sheetContainsGeo(sheet,latS,lonE))throw new Error(`Coordinates outside ${sheet.name}`);
+  const{stdE,stdN}=geoToTM_std(-latS,lonE),{gE:gE_raw,gN:gN_raw}=stdTMtoGrid(stdE,stdN,sheet),gE=Math.round(gE_raw),gN=Math.round(gN_raw);
+  if(!sheetContainsGrid(sheet,gE,gN))throw new Error(`Resolved grid outside ${sheet.name}`);
+  const gridRef=String(gE).padStart(3,'0')+String(gN).padStart(3,'0'),latDMS=dec2dms(latS),lonDMS=dec2dms(lonE);
+  return{gridRef,gE,gN,gE_raw,gN_raw,stdE,stdN,latS,lonE,lat:-latS,lon:lonE,latDMS,lonDMS,sheet};
+}
+function resolveGridReference(gridStr){
+  if(!/^\d{6}$/.test(gridStr))throw new Error('Grid references must be exactly 6 digits');
+  const gE=parseInt(gridStr.slice(0,3),10),gN=parseInt(gridStr.slice(3,6),10);
+  const sheet=findSheetForGrid(gE,gN);
+  if(!sheet)throw new Error(`Grid ${gridStr} is outside all loaded sheets`);
+  return doGridToGeoOnSheet(gridStr,sheet);
+}
+function resolveLiveStart(){
+  if(!userLatLng)throw new Error('Current location not available yet. Tap allow location, then build navigation again.');
+  const lat=userLatLng.lat,lon=userLatLng.lng,latS=Math.abs(lat);
+  const sheet=findSheetForGeo(latS,lon);
+  if(sheet){
+    const r=doGeoToGridOnSheet(latS,lon,sheet);
+    return{...r,isLive:true,label:`LIVE · ${sheet.name} · GR ${r.gridRef}`};
+  }
+  const latDMS=dec2dms(latS),lonDMS=dec2dms(lon);
+  return{
+    latS,lonE:lon,lat,lon,latDMS,lonDMS,stdE:NaN,stdN:NaN,gridRef:'Outside loaded sheets',
+    sheet:{id:'external',name:'EXTERNAL'},isLive:true,label:'LIVE · Outside loaded sheets'
+  };
+}
 
 // ── SHEET MANAGEMENT ──
 function selectSheet(id){
@@ -795,7 +1019,11 @@ function switchScreen(name){
 // ── MAP ──
 let map,mapReady=false,layers={},pins=[],activePin=-1,lastResult=null,userLatLng=null,userMarker=null,geoWatchId=null,rulerMode=false,rulerLine=null,rulerTooltip=null,pointerCircle=null,routes=[],measureFromPin=false,originPin=null,measureLine=null,measureTooltip=null,pinCounter=0,routesVisible=true;
 let sheetRect=null,gridLayer=null,gridVisible=true;
+let navLegLayer=null,navLegMarkers=[];
 const MINUTES_PER_KM_DAY=20,MINUTES_PER_KM_NIGHT=6.6666667;
+const NAV_SPEEDS={foot:5,vehicle:40};
+let navStartMode='live',navTravelMode='foot',activeNavigation=null,navTicker=null;
+let floatingNavMinimized=false,lastNavPosition=null;
 
 function initMap(){
   if(mapReady)return;
@@ -844,7 +1072,43 @@ function syncGridVisibility(){if(!mapReady||!gridLayer)return;if(gridVisible){if
 function toggleGridLines(){gridVisible=!gridVisible;syncGridVisibility();}
 function updateGridToggleButton(){const btn=document.getElementById('btn-grid-toggle');if(btn)btn.textContent=gridVisible?'Hide Grid':'Show Grid';}
 function googleMapsUrl(lat,lon,label=''){return`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lon}`)}`;}
+function googleMapsDirectionsUrl(originLat,originLon,destinationLat,destinationLon,mode='driving'){return`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(`${originLat},${originLon}`)}&destination=${encodeURIComponent(`${destinationLat},${destinationLon}`)}&travelmode=${encodeURIComponent(mode)}`;}
 function updateGoogleLinks(obj){if(!obj)return;const url=googleMapsUrl(obj.lat||(-obj.latS),obj.lon||obj.lonE,obj.name);const g2c=document.getElementById('g2c-google-link');const c2g=document.getElementById('c2g-google-link');if(g2c)g2c.href=url;if(c2g)c2g.href=url;}
+function clearNavLeg(){
+  if(mapReady&&navLegLayer&&map.hasLayer(navLegLayer))map.removeLayer(navLegLayer);
+  navLegMarkers.forEach(marker=>{if(mapReady&&marker&&map.hasLayer(marker))map.removeLayer(marker);});
+  navLegLayer=null;
+  navLegMarkers=[];
+}
+function bearingBetween(lat1,lon1,lat2,lon2){
+  const phi1=toRad(lat1),phi2=toRad(lat2),deltaLon=toRad(lon2-lon1);
+  const y=Math.sin(deltaLon)*Math.cos(phi2);
+  const x=Math.cos(phi1)*Math.sin(phi2)-Math.sin(phi1)*Math.cos(phi2)*Math.cos(deltaLon);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+function bearingLabel(deg){
+  const dirs=['N','NE','E','SE','S','SW','W','NW'];
+  return dirs[Math.round(deg/45)%8];
+}
+function formatBearing(deg){return`${deg.toFixed(1)}° (${bearingLabel(deg)})`;}
+function buildNavVector(start,end){
+  const eastMeters=(end.stdE-start.stdE);
+  const northMeters=(end.stdN-start.stdN);
+  const eastLabel=`${eastMeters>=0?'+':''}${eastMeters.toFixed(0)} m E`;
+  const northLabel=`${northMeters>=0?'+':''}${northMeters.toFixed(0)} m N`;
+  return`${eastLabel} · ${northLabel}`;
+}
+function drawNavigationLeg(start,end){
+  if(!mapReady)initMap();
+  clearNavLeg();
+  navLegLayer=L.polyline([[start.lat,start.lon],[end.lat,end.lon]],{color:'#ffb830',weight:4,opacity:.95,dashArray:'10 6'}).addTo(map);
+  const startMarker=L.marker([start.lat,start.lon],{icon:L.divIcon({className:'',html:'<div class="tac-marker tac-cal"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(map);
+  const endMarker=L.marker([end.lat,end.lon],{icon:L.divIcon({className:'',html:'<div class="tac-marker"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(map);
+  startMarker.bindPopup(`<b style="font-size:13px;color:#ffb830">Start</b><br>GR ${start.gridRef}<br>${start.sheet.name}<br>${start.lat.toFixed(6)}, ${start.lon.toFixed(6)}`);
+  endMarker.bindPopup(`<b style="font-size:13px;color:#39ff6a">Destination</b><br>GR ${end.gridRef}<br>${end.sheet.name}<br>${end.lat.toFixed(6)}, ${end.lon.toFixed(6)}`);
+  navLegMarkers=[startMarker,endMarker];
+  map.fitBounds(L.latLngBounds([[start.lat,start.lon],[end.lat,end.lon]]),{padding:[30,30]});
+}
 function addPin(obj){
   pinCounter++;
   const id=`pin-${pinCounter}`;
@@ -893,13 +1157,14 @@ function renderHistory(){
 }
 function jumpToPin(i){activePin=i;const o=pins[i];pins.forEach((p,j)=>{if(p._m)p._m.setIcon(L.divIcon({className:'',html:'<div class="tac-marker tac-old"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]}));});if(o._m){o._m.setIcon(L.divIcon({className:'',html:'<div class="tac-marker"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]}));o._m.openPopup();map.setView([o.lat,o.lon],Math.max(map.getZoom(),13));}updateInfoBar(o);renderHistory();}
 function removePin(i){if(pins[i]&&pins[i]._m)map.removeLayer(pins[i]._m);pins.splice(i,1);renderHistory();if(!pins.length){document.getElementById('map-info-bar').classList.remove('show');document.getElementById('pin-count').textContent='(0)';}}
-function clearHistory(){pins.forEach(p=>{if(p._m)map.removeLayer(p._m);});pins.length=0;renderHistory();document.getElementById('map-info-bar').classList.remove('show');routes.forEach(r=>{if(r.layer)map.removeLayer(r.layer);});routes.length=0;}
+function clearHistory(){pins.forEach(p=>{if(p._m)map.removeLayer(p._m);});pins.length=0;renderHistory();document.getElementById('map-info-bar').classList.remove('show');routes.forEach(r=>{if(r.layer)map.removeLayer(r.layer);});routes.length=0;clearNavLeg();}
 function setLayer(name){Object.values(layers).forEach(l=>{if(map.hasLayer(l))map.removeLayer(l);});layers[name].addTo(map);['osm','sat','topo'].forEach(n=>{document.getElementById(`btn-layer-${n}`)?.classList.remove('active-layer');});document.getElementById(`btn-layer-${name}`).classList.add('active-layer');}
 function fitSheet(){if(mapReady)map.fitBounds(activeSheet.mapBounds,{padding:[20,20]});}
 function toRad(v){return v*Math.PI/180;}
 function distanceBetween(lat1,lon1,lat2,lon2){const R=6371,dLat=toRad(lat2-lat1),dLon=toRad(lon2-lon1),a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2,c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));return R*c;}
 function formatDistance(km){if(!isFinite(km))return'—';if(km>=1)return`${km.toFixed(2)} km`;return`${Math.round(km*1000)} m`;}
 function formatMinutes(minutes){if(!isFinite(minutes))return'—';const totalSeconds=Math.round(minutes*60),hours=Math.floor(totalSeconds/3600),mins=Math.floor((totalSeconds%3600)/60),secs=totalSeconds%60;if(hours)return`${hours}h ${String(mins).padStart(2,'0')}m ${String(secs).padStart(2,'0')}s`;if(mins)return`${mins}m ${String(secs).padStart(2,'0')}s`;return`${secs}s`;}
+function formatDurationMs(ms){if(!isFinite(ms)||ms<0)return'—';return formatMinutes(ms/60000);}
 function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function startUserLocationWatch(opts={}){
   if(!navigator.geolocation)return;
@@ -910,10 +1175,164 @@ function startUserLocationWatch(opts={}){
     if(mapReady){if(userMarker)userMarker.setLatLng(userLatLng);else userMarker=L.circleMarker(userLatLng,{radius:8,color:'#ffb830',fillColor:'#ffb830',fillOpacity:0.6,weight:2}).addTo(map);if(opts.centerOnFound)centerOnUserLocation(opts.zoom||15);}
     renderHistory();
     if(activePin>=0&&pins[activePin])updateInfoBar(pins[activePin]);
+    refreshActiveNavigation();
   },err=>{if(!opts.quiet)alert(`Location error: ${err.message}`);},{enableHighAccuracy:true,timeout:15000,maximumAge:10000});
 }
 function centerOnUserLocation(zoom=15){if(mapReady&&userLatLng)map.setView(userLatLng,Math.max(map.getZoom(),zoom));}
 function ensureUserLocation(opts={}){startUserLocationWatch(opts);}
+function setNavStartMode(mode){
+  navStartMode=mode;
+  document.getElementById('nav-start-mode-live').classList.toggle('active',mode==='live');
+  document.getElementById('nav-start-mode-grid').classList.toggle('active',mode==='grid');
+  document.getElementById('nav-start-grid-wrap').style.display=mode==='grid'?'':'none';
+  document.getElementById('nav-live-note').textContent=mode==='live'
+    ?'Live start uses your phone GPS as the origin and keeps the navigation leg updated while you move.'
+    :'Manual start uses the grid you type as the origin for route planning and briefing.';
+  document.getElementById('nav-chip-source').textContent=`Start: ${mode==='live'?'Current location':'Manual grid'}`;
+}
+function setNavTravelMode(mode){
+  navTravelMode=mode;
+  document.getElementById('nav-travel-foot').classList.toggle('active',mode==='foot');
+  document.getElementById('nav-travel-vehicle').classList.toggle('active',mode==='vehicle');
+  document.getElementById('nav-chip-travel').textContent=`Mode: ${mode==='foot'?'Foot':'Vehicle'}`;
+  if(lastNavigationResult){
+    const etaMinutes=(lastNavigationResult.distanceKm/NAV_SPEEDS[navTravelMode])*60;
+    lastNavigationResult.etaMinutes=etaMinutes;
+    document.getElementById('g2g-eta').textContent=formatMinutes(etaMinutes);
+  }
+  refreshActiveNavigation();
+}
+function buildStartPointForNavigation(){
+  if(navStartMode==='live'){
+    ensureUserLocation({quiet:false,centerOnFound:false});
+    return resolveLiveStart();
+  }
+  const startGrid=document.getElementById('nav-grid-start').value.trim();
+  return resolveGridReference(startGrid);
+}
+function updateNavStatusChip(label,kind=''){
+  const chip=document.getElementById('nav-chip-state');
+  chip.textContent=label;
+  chip.classList.remove('live','active');
+  if(kind)chip.classList.add(kind);
+}
+function setFloatingNavVisibility(show){
+  const bar=document.getElementById('floating-nav-bar');
+  if(!bar)return;
+  bar.classList.toggle('show',show);
+}
+function setMapNavCardVisibility(show){
+  const card=document.getElementById('map-nav-card');
+  if(!card)return;
+  card.classList.toggle('show',show);
+}
+function updateMapNavCard(nav=lastNavigationResult){
+  const fromEl=document.getElementById('map-nav-from');
+  const toEl=document.getElementById('map-nav-to');
+  const distEl=document.getElementById('map-nav-distance');
+  const timeEl=document.getElementById('map-nav-time');
+  const subEl=document.getElementById('map-nav-sub');
+  const linkEl=document.getElementById('map-nav-google-link');
+  if(!fromEl||!toEl||!distEl||!timeEl||!subEl||!linkEl)return;
+  if(!nav){
+    fromEl.textContent='—';
+    toEl.textContent='—';
+    distEl.textContent='—';
+    timeEl.textContent='—';
+    subEl.textContent='No active route built yet.';
+    linkEl.href='#';
+    setMapNavCardVisibility(false);
+    return;
+  }
+  fromEl.textContent=nav.startLabel||`${nav.start.sheet.name} · ${nav.start.gridRef}`;
+  toEl.textContent=`${nav.end.sheet.name} · ${nav.end.gridRef}`;
+  distEl.textContent=formatDistance(nav.distanceKm);
+  timeEl.textContent=formatMinutes(nav.etaMinutes||0);
+  subEl.textContent=activeNavigation
+    ?`Navigation running · ${activeNavigation.mode==='live'?'Current location':'Manual grid'}`
+    :'Route ready on map.';
+  linkEl.href=googleMapsDirectionsUrl(nav.start.lat,nav.start.lon,nav.end.lat,nav.end.lon);
+  setMapNavCardVisibility(true);
+}
+function setFloatingNavMinimized(minimized){
+  floatingNavMinimized=minimized;
+  const bar=document.getElementById('floating-nav-bar');
+  const btn=document.getElementById('floating-nav-toggle');
+  if(!bar||!btn)return;
+  bar.classList.toggle('minimized',minimized);
+  btn.textContent=minimized?'Expand':'Minimize';
+}
+function toggleFloatingNavBar(){setFloatingNavMinimized(!floatingNavMinimized);}
+function updateFloatingNav(distanceText,timeText,bearingText,elapsedText,metaText){
+  document.getElementById('floating-nav-distance').textContent=distanceText;
+  document.getElementById('floating-nav-time').textContent=timeText;
+  document.getElementById('floating-nav-bearing').textContent=bearingText;
+  document.getElementById('floating-nav-elapsed').textContent=elapsedText;
+  document.getElementById('floating-nav-meta').textContent=metaText;
+}
+function maybeAutoMinimizeFloatingNav(current){
+  if(!activeNavigation||activeNavigation.mode!=='live'||!current)return;
+  if(!lastNavPosition){lastNavPosition={...current};return;}
+  const delta=distanceBetween(lastNavPosition.lat,lastNavPosition.lon,current.lat,current.lon);
+  if(delta>=0.01&&!floatingNavMinimized)setFloatingNavMinimized(true);
+  lastNavPosition={...current};
+}
+function refreshActiveNavigation(){
+  if(!activeNavigation)return;
+  const nav=activeNavigation;
+  const current=(nav.mode==='live'&&userLatLng)?{lat:userLatLng.lat,lon:userLatLng.lng}:nav.start;
+  const remainingKm=distanceBetween(current.lat,current.lon,nav.end.lat,nav.end.lon);
+  const bearing=bearingBetween(current.lat,current.lon,nav.end.lat,nav.end.lon);
+  const etaMinutes=(remainingKm/NAV_SPEEDS[nav.travelMode])*60;
+  const distanceText=formatDistance(remainingKm);
+  const timeText=formatMinutes(etaMinutes);
+  const bearingText=formatBearing(bearing);
+  const elapsedText=formatDurationMs(Date.now()-nav.startedAt);
+  document.getElementById('nav-remaining-distance').textContent=distanceText;
+  document.getElementById('nav-remaining-time').textContent=timeText;
+  document.getElementById('nav-current-bearing').textContent=bearingText;
+  document.getElementById('nav-elapsed').textContent=elapsedText;
+  updateFloatingNav(distanceText,timeText,bearingText,elapsedText,`${nav.mode==='live'?'Current location':'Manual grid'} · ${nav.travelMode==='foot'?'Foot':'Vehicle'}`);
+  document.getElementById('map-nav-distance').textContent=distanceText;
+  document.getElementById('map-nav-time').textContent=timeText;
+  document.getElementById('map-nav-sub').textContent=`Navigation running · ${nav.mode==='live'?'Current location':'Manual grid'}`;
+  maybeAutoMinimizeFloatingNav(current);
+  if(mapReady&&current&&nav.end)drawNavigationLeg({...nav.start,lat:current.lat,lon:current.lon,gridRef:nav.mode==='live'?'LIVE POSITION':nav.start.gridRef,sheet:nav.start.sheet},nav.end);
+  if(remainingKm<=0.03){
+    updateNavStatusChip('Arrived','active');
+    updateFloatingNav(distanceText,'Arrived',bearingText,elapsedText,'Destination reached');
+  }
+}
+function startNavigation(){
+  if(!lastNavigationResult){showErr('g2g','Build a navigation leg first.');return;}
+  activeNavigation={start:lastNavigationResult.start,end:lastNavigationResult.end,mode:navStartMode,travelMode:navTravelMode,startedAt:Date.now()};
+  updateNavStatusChip(activeNavigation.mode==='live'?'Live navigation':'Manual navigation','active');
+  document.getElementById('nav-chip-source').textContent=`Start: ${activeNavigation.mode==='live'?'Current location':'Manual grid'}`;
+  document.getElementById('nav-chip-travel').textContent=`Mode: ${activeNavigation.travelMode==='foot'?'Foot':'Vehicle'}`;
+  if(navTicker)clearInterval(navTicker);
+  lastNavPosition=null;
+  setFloatingNavVisibility(true);
+  setFloatingNavMinimized(false);
+  updateMapNavCard(lastNavigationResult);
+  navTicker=setInterval(refreshActiveNavigation,1000);
+  refreshActiveNavigation();
+  showGridNavigationOnMap();
+}
+function endNavigation(){
+  activeNavigation=null;
+  if(navTicker)clearInterval(navTicker);
+  navTicker=null;
+  updateNavStatusChip('Idle');
+  document.getElementById('nav-remaining-distance').textContent='—';
+  document.getElementById('nav-remaining-time').textContent='—';
+  document.getElementById('nav-current-bearing').textContent='—';
+  document.getElementById('nav-elapsed').textContent='—';
+  lastNavPosition=null;
+  setFloatingNavVisibility(false);
+  updateFloatingNav('—','—','—','—','Idle');
+  updateMapNavCard(lastNavigationResult);
+  clearNavLeg();
+}
 function toggleRuler(){
   if(!mapReady)return;
   rulerMode=!rulerMode;
@@ -959,23 +1378,19 @@ function showErr(t,msg){const el=document.getElementById(`${t}-err`);el.textCont
 function convertGrid(){
   try{
     const v=document.getElementById('grid-input').value.trim();
-    if(!/^\d{6}$/.test(v))throw new Error('Must be exactly 6 digits');
-    const gE=parseInt(v.slice(0,3),10),gN=parseInt(v.slice(3,6),10);
-    const matchedSheet=findSheetForGrid(gE,gN);
-    if(!matchedSheet)throw new Error('Grid reference is outside all loaded sheets');
-    if(matchedSheet.id!==activeSheet.id)selectSheet(matchedSheet.id);
-    const r=doGridToGeo(v);
+    const r=resolveGridReference(v);
+    if(r.sheet.id!==activeSheet.id)selectSheet(r.sheet.id);
     document.getElementById('out-lat-dms').textContent=fmtDMS(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S');
     document.getElementById('out-lon-dms').textContent=fmtDMS(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E');
     document.getElementById('out-lat-dec').textContent=`-${r.latS.toFixed(8)}°`;
-    document.getElementById('out-lon-dec').textContent=`${r.lonDeg.toFixed(8)}°`;
-    document.getElementById('g2c-prec').textContent=`[${activeSheet.name}] TM: E=${r.stdE.toFixed(2)} m  N=${r.stdN.toFixed(2)} m`;
+    document.getElementById('out-lon-dec').textContent=`${r.lon.toFixed(8)}°`;
+    document.getElementById('g2c-prec').textContent=`[${r.sheet.name}] TM: E=${r.stdE.toFixed(2)} m  N=${r.stdN.toFixed(2)} m`;
     document.getElementById('g2c-result').classList.add('show');
     document.getElementById('g2c-steps-btn').style.display='flex';
     document.getElementById('g2c-err').classList.remove('show');
     // Steps
     document.getElementById('g2c-steps').innerHTML=buildGridToGeoSteps(r,v);
-    lastResult={gridRef:r.gridRef,latS:r.latS,lonE:r.lonDeg,lat:-r.latS,lon:r.lonDeg,latDMSstr:fmtDMS(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S'),lonDMSstr:fmtDMS(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E'),stdE:r.stdE,stdN:r.stdN,src:'grid',name:'Conversion result',sheet:activeSheet.name};
+    lastResult={gridRef:r.gridRef,latS:r.latS,lonE:r.lon,lat:r.lat,lon:r.lon,latDMSstr:fmtDMS(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S'),lonDMSstr:fmtDMS(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E'),stdE:r.stdE,stdN:r.stdN,src:'grid',name:'Conversion result',sheet:r.sheet.name};
     updateGoogleLinks(lastResult);
     document.getElementById('g2c-map-btn').classList.add('visible');
   }catch(e){showErr('g2c',e.message);}
@@ -1006,8 +1421,44 @@ function convertGeo(){
   }catch(e){showErr('c2g',e.message);}
 }
 
-function buildGridToGeoSteps(r,v){return`<b>1.</b> Grid Ref: ${v} → gE=${r.gE}, gN=${r.gN}<br><b>2.</b> stdE = ${activeSheet.baseE} + ${r.gE}×100 = <b>${r.stdE.toFixed(2)} m</b><br><b>3.</b> stdN = ${activeSheet.baseN} + ${r.gN}×100 = <b>${r.stdN.toFixed(2)} m</b><br><b>4.</b> TM Inverse → Lat = ${(-r.latS).toFixed(8)}°, Lon = ${r.lonDeg.toFixed(8)}°<br><b>5.</b> Lat (S): ${fmtDMS(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S')}<br><b>6.</b> Lon (E): ${fmtDMS(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E')}`;}
+function buildGridToGeoSteps(r,v){return`<b>1.</b> Grid Ref: ${v} → gE=${r.gE}, gN=${r.gN}<br><b>2.</b> stdE = ${r.sheet.baseE} + ${r.gE}×100 = <b>${r.stdE.toFixed(2)} m</b><br><b>3.</b> stdN = ${r.sheet.baseN} + ${r.gN}×100 = <b>${r.stdN.toFixed(2)} m</b><br><b>4.</b> TM Inverse → Lat = ${r.lat.toFixed(8)}°, Lon = ${r.lon.toFixed(8)}°<br><b>5.</b> Lat (S): ${fmtDMS(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S')}<br><b>6.</b> Lon (E): ${fmtDMS(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E')}`;}
 function buildGeoToGridSteps(r){return`<b>1.</b> Input: ${r.latS.toFixed(8)}°S, ${r.lonE.toFixed(8)}°E<br><b>2.</b> TM Forward → stdE=${r.stdE.toFixed(2)} m, stdN=${r.stdN.toFixed(2)} m<br><b>3.</b> gE_raw = (${r.stdE.toFixed(2)} − ${activeSheet.baseE}) / 100 = <b>${r.gE_raw.toFixed(4)}</b><br><b>4.</b> gN_raw = (${r.stdN.toFixed(2)} − ${activeSheet.baseN}) / 100 = <b>${r.gN_raw.toFixed(4)}</b><br><b>5.</b> Round → gE=${r.gE}, gN=${r.gN}<br><b>6.</b> Grid Ref: <b>${r.gridRef}</b>`;}
+function buildGridToGridSteps(nav){
+  return`<b>1.</b> Start point ${nav.startLabel} → ${nav.start.lat.toFixed(8)}°, ${nav.start.lon.toFixed(8)}°<br><b>2.</b> Destination grid ${nav.end.gridRef} on <b>${nav.end.sheet.name}</b> → ${nav.end.lat.toFixed(8)}°, ${nav.end.lon.toFixed(8)}°<br><b>3.</b> Geodesic distance = <b>${nav.distanceKm.toFixed(3)} km</b><br><b>4.</b> Estimated time (${navTravelMode}) = <b>${formatMinutes(nav.etaMinutes)}</b><br><b>5.</b> Initial bearing = <b>${formatBearing(nav.bearing)}</b><br><b>6.</b> ${isFinite(nav.start.stdE)&&isFinite(nav.end.stdE)?`TM movement vector = <b>${buildNavVector(nav.start,nav.end)}</b>`:'TM vector unavailable because live start is outside loaded sheets'}`;}
+
+let lastNavigationResult=null;
+function convertGridToGrid(){
+  try{
+    const start=buildStartPointForNavigation();
+    const startLabel=navStartMode==='live'?start.label:`${start.sheet.name} · GR ${start.gridRef}`;
+    const endGrid=document.getElementById('nav-grid-end').value.trim();
+    const end=resolveGridReference(endGrid);
+    const distanceKm=distanceBetween(start.lat,start.lon,end.lat,end.lon);
+    const bearing=bearingBetween(start.lat,start.lon,end.lat,end.lon);
+    const backBearing=(bearing+180)%360;
+    const startDms=`${fmtDMS(start.latDMS.d,start.latDMS.m,start.latDMS.s,'S')} · ${fmtDMS(start.lonDMS.d,start.lonDMS.m,start.lonDMS.s,'E')}`;
+    const endDms=`${fmtDMS(end.latDMS.d,end.latDMS.m,end.latDMS.s,'S')} · ${fmtDMS(end.lonDMS.d,end.lonDMS.m,end.lonDMS.s,'E')}`;
+    const etaMinutes=(distanceKm/NAV_SPEEDS[navTravelMode])*60;
+    lastNavigationResult={start,end,distanceKm,bearing,backBearing,startDms,endDms,etaMinutes,startLabel};
+    document.getElementById('g2g-start').textContent=startLabel;
+    document.getElementById('g2g-end').textContent=`${end.sheet.name} · GR ${end.gridRef}`;
+    document.getElementById('g2g-start-coords').innerHTML=`${startDms}<br>${start.lat.toFixed(6)}, ${start.lon.toFixed(6)}`;
+    document.getElementById('g2g-end-coords').innerHTML=`${endDms}<br>${end.lat.toFixed(6)}, ${end.lon.toFixed(6)}`;
+    document.getElementById('g2g-distance').textContent=formatDistance(distanceKm);
+    document.getElementById('g2g-eta').textContent=formatMinutes(etaMinutes);
+    document.getElementById('g2g-bearing').textContent=formatBearing(bearing);
+    document.getElementById('g2g-back-bearing').textContent=formatBearing(backBearing);
+    document.getElementById('g2g-vector').textContent=isFinite(start.stdE)&&isFinite(end.stdE)?buildNavVector(start,end):'Unavailable outside loaded sheets';
+    document.getElementById('g2g-prec').textContent=`Start TM ${isFinite(start.stdE)?start.stdE.toFixed(2):'—'} / ${isFinite(start.stdN)?start.stdN.toFixed(2):'—'} · Destination TM ${end.stdE.toFixed(2)} / ${end.stdN.toFixed(2)}`;
+    document.getElementById('g2g-google-link').href=googleMapsDirectionsUrl(start.lat,start.lon,end.lat,end.lon);
+    document.getElementById('g2g-result').classList.add('show');
+    document.getElementById('g2g-steps-btn').style.display='flex';
+    document.getElementById('g2g-steps').innerHTML=buildGridToGridSteps(lastNavigationResult);
+    document.getElementById('g2g-err').classList.remove('show');
+    updateNavStatusChip('Ready','live');
+    updateMapNavCard(lastNavigationResult);
+  }catch(e){showErr('g2g',e.message);}
+}
 
 function toggleSteps(t){const b=document.getElementById(`${t}-steps-btn`),x=document.getElementById(`${t}-steps`);b.classList.toggle('open',x.classList.toggle('show'));}
 
@@ -1015,11 +1466,27 @@ function copyResult(t){
   const btn=document.getElementById(`${t}-copy`);
   let txt='';
   if(t==='g2c')txt=`Lat: ${document.getElementById('out-lat-dms').textContent} (${document.getElementById('out-lat-dec').textContent})\nLon: ${document.getElementById('out-lon-dms').textContent} (${document.getElementById('out-lon-dec').textContent})`;
+  else if(t==='g2g')txt=`Start: ${document.getElementById('g2g-start').textContent}\nDestination: ${document.getElementById('g2g-end').textContent}\nDistance: ${document.getElementById('g2g-distance').textContent}\nETA: ${document.getElementById('g2g-eta').textContent}\nBearing: ${document.getElementById('g2g-bearing').textContent}\nBack Bearing: ${document.getElementById('g2g-back-bearing').textContent}`;
   else txt=`Grid Ref: ${document.getElementById('out-gridref').textContent}\nTM E: ${document.getElementById('out-tm-e').textContent}\nTM N: ${document.getElementById('out-tm-n').textContent}`;
   navigator.clipboard.writeText(txt).then(()=>{btn.textContent='✓ COPIED';btn.classList.add('copied');setTimeout(()=>{btn.textContent='⧉ COPY';btn.classList.remove('copied');},1800);});
 }
 
 function goToMap(){if(!lastResult)return;switchScreen('map');setTimeout(()=>{if(map)map.invalidateSize();addPin({...lastResult});},250);}
+function showGridNavigationOnMap(){
+  if(!lastNavigationResult)return;
+  const focusSheet=lastNavigationResult.start.sheet.id===lastNavigationResult.end.sheet.id?lastNavigationResult.start.sheet.id:lastNavigationResult.start.sheet.id;
+  if(focusSheet!==activeSheet.id)selectSheet(focusSheet);
+  switchScreen('map');
+  setTimeout(()=>{
+    if(map)map.invalidateSize();
+    updateMapNavCard(lastNavigationResult);
+    if(activeNavigation&&activeNavigation.mode==='live'&&userLatLng){
+      drawNavigationLeg({...activeNavigation.start,lat:userLatLng.lat,lon:userLatLng.lng,gridRef:'LIVE POSITION',sheet:activeNavigation.start.sheet},activeNavigation.end);
+      return;
+    }
+    drawNavigationLeg(lastNavigationResult.start,lastNavigationResult.end);
+  },250);
+}
 
 // ── PIN SHEET TOGGLE ──
 let pinSheetOpen=false;
@@ -1036,9 +1503,10 @@ document.addEventListener('keydown',e=>{
   if(e.key!=='Enter')return;
   if(currentScreen==='g2c')convertGrid();
   else if(currentScreen==='c2g')convertGeo();
+  else if(currentScreen==='g2g')convertGridToGrid();
 });
 
-window.addEventListener('load',()=>{document.getElementById('login-password')?.focus();});
+window.addEventListener('load',()=>{document.getElementById('login-password')?.focus();setNavStartMode('live');setNavTravelMode('foot');});
 </script>
 </body>
 </html>

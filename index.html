@@ -345,7 +345,7 @@ html,body{
 .mib-val{font-family:var(--mono);font-size:clamp(12px,1.15vw,13px);color:var(--accent);line-height:1.5;overflow-wrap:anywhere}
 .mib-val.secondary{color:var(--accent2);font-size:clamp(11px,1.05vw,12px)}
 .map-nav-card{
-  position:absolute;top:12px;right:12px;width:min(220px,calc(100% - 24px));z-index:410;
+  position:absolute;top:68px;left:12px;width:min(220px,calc(100% - 24px));z-index:410;
   background:rgba(7,10,7,.95);border:1px solid rgba(57,255,106,.24);border-radius:14px;
   box-shadow:0 14px 30px rgba(0,0,0,.32);padding:10px;display:none;touch-action:manipulation
 }
@@ -504,7 +504,7 @@ html,body{
   .map-toolbar{padding:8px}
   .map-icon-btn{flex:1 1 calc(50% - 6px);text-align:center}
   .mib-item{min-width:calc(50% - 8px);flex-basis:calc(50% - 8px)}
-  .map-nav-card{top:8px;right:8px;width:min(180px,calc(100% - 16px))}
+  .map-nav-card{top:64px;left:8px;width:min(180px,calc(100% - 16px))}
 }
 
 @media(min-width:768px){
@@ -1086,6 +1086,15 @@ function updateGridToggleButton(){const btn=document.getElementById('btn-grid-to
 function googleMapsUrl(lat,lon,label=''){return`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lon}`)}`;}
 function googleMapsDirectionsUrl(originLat,originLon,destinationLat,destinationLon,mode='driving'){return`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(`${originLat},${originLon}`)}&destination=${encodeURIComponent(`${destinationLat},${destinationLon}`)}&travelmode=${encodeURIComponent(mode)}`;}
 function updateGoogleLinks(obj){if(!obj)return;const url=googleMapsUrl(obj.lat||(-obj.latS),obj.lon||obj.lonE,obj.name);const g2c=document.getElementById('g2c-google-link');const c2g=document.getElementById('c2g-google-link');if(g2c)g2c.href=url;if(c2g)c2g.href=url;}
+function navigationResultFromPoints(start,end,startLabel){
+  const startDms=`${fmtDMS(start.latDMS.d,start.latDMS.m,start.latDMS.s,'S')} · ${fmtDMS(start.lonDMS.d,start.lonDMS.m,start.lonDMS.s,'E')}`;
+  const endDms=`${fmtDMS(end.latDMS.d,end.latDMS.m,end.latDMS.s,'S')} · ${fmtDMS(end.lonDMS.d,end.lonDMS.m,end.lonDMS.s,'E')}`;
+  const distanceKm=distanceBetween(start.lat,start.lon,end.lat,end.lon);
+  const bearing=bearingBetween(start.lat,start.lon,end.lat,end.lon);
+  const backBearing=(bearing+180)%360;
+  const etaMinutes=(distanceKm/NAV_SPEEDS[navTravelMode])*60;
+  return{start,end,distanceKm,bearing,backBearing,startDms,endDms,etaMinutes,startLabel};
+}
 function clearNavLeg(){
   if(mapReady&&navLegLayer&&map.hasLayer(navLegLayer))map.removeLayer(navLegLayer);
   navLegMarkers.forEach(marker=>{if(mapReady&&marker&&map.hasLayer(marker))map.removeLayer(marker);});
@@ -1130,7 +1139,7 @@ function addPin(obj){
   if(pins.length>0){const prev=pins[pins.length-1];const km=distanceBetween(prev.lat,prev.lon,lat,lon);pin.prevDistance=formatDistance(km);}
   if(userLatLng){const km=distanceBetween(userLatLng.lat,userLatLng.lng,lat,lon);pin.distanceToUser=formatDistance(km);}
   const marker=L.marker([lat,lon],{icon:L.divIcon({className:'',html:'<div class="tac-marker"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(map);
-  marker.bindPopup(`<b style="font-size:13px;color:#39ff6a">${escapeHtml(pin.name)}</b><br>GR ${pin.gridRef}<br>${pin.latDMSstr}<br>${pin.lonDMSstr}<div class="popup-actions"><button onclick="jumpToPin(${pins.length})">Focus</button><button onclick="window.open('${googleMapsUrl(lat,lon)}','_blank','noopener')">Maps</button><button class="delete" onclick="removePin(${pins.length})">Remove</button></div>`);
+  marker.bindPopup(`<b style="font-size:13px;color:#39ff6a">${escapeHtml(pin.name)}</b><br>GR ${pin.gridRef}<br>${pin.latDMSstr}<br>${pin.lonDMSstr}<div class="popup-actions"><button onclick="jumpToPin(${pins.length})">Focus</button><button onclick="navigateToPin(${pins.length})">Nav</button><button onclick="window.open('${googleMapsUrl(lat,lon)}','_blank','noopener')">Maps</button><button class="delete" onclick="removePin(${pins.length})">Remove</button></div>`);
   pin._m=marker;
   pins.push(pin);
   activePin=pins.length-1;
@@ -1163,12 +1172,45 @@ function renderHistory(){
       </div>
       <div class="hi-name">${escapeHtml(p.name)}</div>
       <div class="hi-dms">${p.latDMSstr} · ${p.lonDMSstr}</div>
+      <button class="copy-btn" style="margin-top:6px" onclick="event.stopPropagation();navigateToPin(${i})">NAVIGATE</button>
       ${p.prevDistance?`<span class="hi-distance delta">Δ ${p.prevDistance}</span>`:''}
       ${p.distanceToUser?`<span class="hi-distance" style="margin-left:4px;color:var(--muted)">You: ${p.distanceToUser}</span>`:''}
       <label class="hi-route-check" onclick="event.stopPropagation()"><input type="checkbox" ${p.forRoute?'checked':''} onchange="togglePinForRoute('${p.id}',this.checked)"> Include in Route</label>
     </div>`).join('');
 }
 function jumpToPin(i){activePin=i;const o=pins[i];pins.forEach((p,j)=>{if(p._m)p._m.setIcon(L.divIcon({className:'',html:'<div class="tac-marker tac-old"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]}));});if(o._m){o._m.setIcon(L.divIcon({className:'',html:'<div class="tac-marker"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]}));o._m.openPopup();map.setView([o.lat,o.lon],Math.max(map.getZoom(),13));}updateInfoBar(o);renderHistory();}
+function navigateToPin(i){
+  const p=pins[i];
+  if(!p)return;
+  try{
+    const start=buildStartPointForNavigation();
+    const startLabel=navStartMode==='live'?(start.label||'LIVE START'):`${start.sheet.name} · GR ${start.gridRef}`;
+    const end={
+      gridRef:p.gridRef,
+      lat:p.lat,lon:p.lon,latS:Math.abs(p.lat),lonE:p.lon,stdE:p.stdE,stdN:p.stdN,
+      latDMS:dec2dms(Math.abs(p.lat)),lonDMS:dec2dms(p.lon),sheet:{name:p.sheet||activeSheet.name,id:(p.sheet||activeSheet.name).toLowerCase()}
+    };
+    lastNavigationResult=navigationResultFromPoints(start,end,startLabel);
+    document.getElementById('g2g-start').textContent=startLabel;
+    document.getElementById('g2g-end').textContent=`${end.sheet.name} · GR ${end.gridRef}`;
+    document.getElementById('g2g-start-coords').innerHTML=`${lastNavigationResult.startDms}<br>${start.lat.toFixed(6)}, ${start.lon.toFixed(6)}`;
+    document.getElementById('g2g-end-coords').innerHTML=`${lastNavigationResult.endDms}<br>${end.lat.toFixed(6)}, ${end.lon.toFixed(6)}`;
+    document.getElementById('g2g-distance').textContent=formatDistance(lastNavigationResult.distanceKm);
+    document.getElementById('g2g-eta').textContent=formatMinutes(lastNavigationResult.etaMinutes);
+    document.getElementById('g2g-bearing').textContent=formatBearing(lastNavigationResult.bearing);
+    document.getElementById('g2g-back-bearing').textContent=formatBearing(lastNavigationResult.backBearing);
+    document.getElementById('g2g-vector').textContent=isFinite(start.stdE)&&isFinite(end.stdE)?buildNavVector(start,end):'Unavailable outside loaded sheets';
+    document.getElementById('g2g-prec').textContent=`Start TM ${isFinite(start.stdE)?start.stdE.toFixed(2):'—'} / ${isFinite(start.stdN)?start.stdN.toFixed(2):'—'} · Destination TM ${isFinite(end.stdE)?end.stdE.toFixed(2):'—'} / ${isFinite(end.stdN)?end.stdN.toFixed(2):'—'}`;
+    document.getElementById('g2g-google-link').href=googleMapsDirectionsUrl(start.lat,start.lon,end.lat,end.lon);
+    document.getElementById('g2g-result').classList.add('show');
+    document.getElementById('g2g-steps-btn').style.display='flex';
+    document.getElementById('g2g-steps').innerHTML=buildGridToGridSteps(lastNavigationResult);
+    updateNavStatusChip('Ready','live');
+    updateMapNavCard(lastNavigationResult);
+    switchScreen('map');
+    setTimeout(()=>{if(map)map.invalidateSize();drawNavigationLeg(start,end,{fit:true});},250);
+  }catch(e){alert(e.message);}
+}
 function removePin(i){if(pins[i]&&pins[i]._m)map.removeLayer(pins[i]._m);pins.splice(i,1);renderHistory();if(!pins.length){document.getElementById('map-info-bar').classList.remove('show');document.getElementById('pin-count').textContent='(0)';}}
 function clearHistory(){pins.forEach(p=>{if(p._m)map.removeLayer(p._m);});pins.length=0;renderHistory();document.getElementById('map-info-bar').classList.remove('show');routes.forEach(r=>{if(r.layer)map.removeLayer(r.layer);});routes.length=0;clearNavLeg();}
 function setLayer(name){Object.values(layers).forEach(l=>{if(map.hasLayer(l))map.removeLayer(l);});layers[name].addTo(map);['osm','sat','topo'].forEach(n=>{document.getElementById(`btn-layer-${n}`)?.classList.remove('active-layer');});document.getElementById(`btn-layer-${name}`).classList.add('active-layer');}

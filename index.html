@@ -345,13 +345,13 @@ html,body{
 .mib-val{font-family:var(--mono);font-size:clamp(12px,1.15vw,13px);color:var(--accent);line-height:1.5;overflow-wrap:anywhere}
 .mib-val.secondary{color:var(--accent2);font-size:clamp(11px,1.05vw,12px)}
 .map-nav-card{
-  position:absolute;top:68px;left:12px;width:min(220px,calc(100% - 24px));z-index:410;
+  position:absolute;top:96px;left:12px;width:clamp(156px,34vw,220px);z-index:410;
   background:rgba(7,10,7,.95);border:1px solid rgba(57,255,106,.24);border-radius:14px;
   box-shadow:0 14px 30px rgba(0,0,0,.32);padding:10px;display:none;touch-action:manipulation
 }
 .map-nav-card.show{display:block}
 .map-nav-card.minimized .map-nav-grid,.map-nav-card.minimized .map-nav-actions{display:none}
-.map-nav-card.minimized{width:min(160px,calc(100% - 24px));padding:8px 10px}
+.map-nav-card.minimized{width:clamp(132px,28vw,160px);padding:8px 10px}
 .map-nav-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .map-nav-card.minimized .map-nav-head{margin-bottom:0}
 .map-nav-title{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.9px;text-transform:uppercase}
@@ -364,6 +364,7 @@ html,body{
 .map-nav-grid .result-item{padding:8px}
 .map-nav-grid .r-value{font-size:13px;line-height:1.25}
 .map-nav-grid .r-label{font-size:9px;margin-bottom:4px}
+.map-nav-grid .result-item.objective{grid-column:1/-1}
 .map-nav-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .map-nav-btn{
   flex:1 1 calc(50% - 3px);border-radius:8px;padding:9px 8px;font-family:var(--mono);font-size:9px;
@@ -371,6 +372,9 @@ html,body{
 }
 .map-nav-btn.start{background:rgba(57,255,106,.1);border:1px solid var(--accent);color:var(--accent)}
 .map-nav-btn.end{background:rgba(0,201,167,.08);border:1px solid var(--accent2);color:var(--accent2)}
+.map-screen:fullscreen .map-nav-card,
+.map-screen:-ms-fullscreen .map-nav-card,
+.map-screen:-webkit-full-screen .map-nav-card{top:16px;left:16px;z-index:1000}
 
 /* ── HISTORY / PIN PANEL (bottom sheet on map) ── */
 .pin-sheet{
@@ -504,7 +508,7 @@ html,body{
   .map-toolbar{padding:8px}
   .map-icon-btn{flex:1 1 calc(50% - 6px);text-align:center}
   .mib-item{min-width:calc(50% - 8px);flex-basis:calc(50% - 8px)}
-  .map-nav-card{top:64px;left:8px;width:min(180px,calc(100% - 16px))}
+  .map-nav-card{top:92px;left:8px;width:clamp(148px,42vw,180px)}
 }
 
 @media(min-width:768px){
@@ -703,13 +707,14 @@ html,body{
     </div>
 
     <!-- SCREEN: Map -->
-    <div class="screen" id="screen-map">
+    <div class="screen map-screen" id="screen-map">
       <div class="map-toolbar">
         <button class="map-icon-btn active-layer" id="btn-layer-osm" onclick="setLayer('osm')">Street</button>
         <button class="map-icon-btn" id="btn-layer-sat" onclick="setLayer('sat')">Sat</button>
         <button class="map-icon-btn" id="btn-layer-topo" onclick="setLayer('topo')">Topo</button>
         <button class="map-icon-btn" id="btn-grid-toggle" onclick="toggleGridLines()">Grid</button>
         <button class="map-icon-btn" onclick="fitSheet()">⊡ Sheet</button>
+        <button class="map-icon-btn" id="btn-map-fullscreen" onclick="toggleMapFullscreen()">Full</button>
         <button class="map-icon-btn map-locate-btn" id="btn-locate" onclick="ensureUserLocation({quiet:false,centerOnFound:true,zoom:15})">⊙ Me</button>
         <button class="map-icon-btn map-ruler-btn" id="btn-ruler" onclick="toggleRuler()">📏</button>
       </div>
@@ -725,8 +730,9 @@ html,body{
           <button class="map-nav-toggle" id="map-nav-toggle" onclick="toggleMapNavCard()">Min</button>
         </div>
         <div class="map-nav-grid">
-          <div class="result-item secondary"><div class="r-label">Distance</div><div class="r-value" id="map-nav-distance">—</div></div>
+          <div class="result-item secondary"><div class="r-label">Remaining</div><div class="r-value" id="map-nav-distance">—</div></div>
           <div class="result-item secondary"><div class="r-label">Time</div><div class="r-value" id="map-nav-time">—</div></div>
+          <div class="result-item secondary objective"><div class="r-label">Objective</div><div class="r-value" id="map-nav-objective">—</div></div>
         </div>
         <div class="map-nav-actions">
           <button class="map-nav-btn start" id="map-nav-start-btn" onclick="startNavigation()">Start</button>
@@ -1068,6 +1074,7 @@ function initMap(){
       document.getElementById('map-cursor-coords').textContent=`GR ${r.gridRef} · ${latlng.lat.toFixed(5)}°, ${latlng.lng.toFixed(5)}°`;
     }catch{document.getElementById('map-cursor-coords').textContent=`${latlng.lat.toFixed(5)}°, ${latlng.lng.toFixed(5)}° (outside sheet)`;}
   });
+  ['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(evt=>document.addEventListener(evt,handleMapFullscreenChange));
   startUserLocationWatch({quiet:true});
 }
 
@@ -1215,6 +1222,28 @@ function removePin(i){if(pins[i]&&pins[i]._m)map.removeLayer(pins[i]._m);pins.sp
 function clearHistory(){pins.forEach(p=>{if(p._m)map.removeLayer(p._m);});pins.length=0;renderHistory();document.getElementById('map-info-bar').classList.remove('show');routes.forEach(r=>{if(r.layer)map.removeLayer(r.layer);});routes.length=0;clearNavLeg();}
 function setLayer(name){Object.values(layers).forEach(l=>{if(map.hasLayer(l))map.removeLayer(l);});layers[name].addTo(map);['osm','sat','topo'].forEach(n=>{document.getElementById(`btn-layer-${n}`)?.classList.remove('active-layer');});document.getElementById(`btn-layer-${name}`).classList.add('active-layer');}
 function fitSheet(){if(mapReady)map.fitBounds(activeSheet.mapBounds,{padding:[20,20]});}
+function isMapFullscreen(){
+  const el=document.getElementById('screen-map');
+  return document.fullscreenElement===el||document.webkitFullscreenElement===el||document.msFullscreenElement===el;
+}
+function handleMapFullscreenChange(){
+  const btn=document.getElementById('btn-map-fullscreen');
+  if(btn)btn.textContent=isMapFullscreen()?'Exit':'Full';
+  if(map)setTimeout(()=>map.invalidateSize(),120);
+}
+function toggleMapFullscreen(){
+  const el=document.getElementById('screen-map');
+  if(!el)return;
+  if(isMapFullscreen()){
+    if(document.exitFullscreen)document.exitFullscreen();
+    else if(document.webkitExitFullscreen)document.webkitExitFullscreen();
+    else if(document.msExitFullscreen)document.msExitFullscreen();
+    return;
+  }
+  if(el.requestFullscreen)el.requestFullscreen();
+  else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
+  else if(el.msRequestFullscreen)el.msRequestFullscreen();
+}
 function toRad(v){return v*Math.PI/180;}
 function distanceBetween(lat1,lon1,lat2,lon2){const R=6371,dLat=toRad(lat2-lat1),dLon=toRad(lon2-lon1),a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2,c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));return R*c;}
 function formatDistance(km){if(!isFinite(km))return'—';if(km>=1)return`${km.toFixed(2)} km`;return`${Math.round(km*1000)} m`;}
@@ -1293,17 +1322,20 @@ function toggleMapNavCard(){setMapNavCardMinimized(!mapNavMinimized);}
 function updateMapNavCard(nav=lastNavigationResult){
   const distEl=document.getElementById('map-nav-distance');
   const timeEl=document.getElementById('map-nav-time');
+  const objectiveEl=document.getElementById('map-nav-objective');
   const subEl=document.getElementById('map-nav-sub');
-  if(!distEl||!timeEl||!subEl)return;
+  if(!distEl||!timeEl||!objectiveEl||!subEl)return;
   if(!nav){
     distEl.textContent='—';
     timeEl.textContent='—';
+    objectiveEl.textContent='—';
     subEl.textContent='No active route built yet.';
     setMapNavCardVisibility(false);
     return;
   }
-  distEl.textContent=formatDistance(nav.distanceKm);
+  distEl.textContent=activeNavigation?document.getElementById('nav-remaining-distance')?.textContent||formatDistance(nav.distanceKm):formatDistance(nav.distanceKm);
   timeEl.textContent=formatMinutes(nav.etaMinutes||0);
+  objectiveEl.textContent=formatDistance(nav.distanceKm);
   subEl.textContent=activeNavigation
     ?`Navigation running · ${activeNavigation.mode==='live'?'Current location':'Manual grid'}`
     :'Route ready on map.';
@@ -1350,6 +1382,7 @@ function refreshActiveNavigation(){
   updateFloatingNav(distanceText,timeText,bearingText,elapsedText,`${nav.mode==='live'?'Current location':'Manual grid'} · ${nav.travelMode==='foot'?'Foot':'Vehicle'}`);
   document.getElementById('map-nav-distance').textContent=distanceText;
   document.getElementById('map-nav-time').textContent=timeText;
+  document.getElementById('map-nav-objective').textContent=formatDistance(nav.distanceKm);
   document.getElementById('map-nav-sub').textContent=`Navigation running · ${nav.mode==='live'?'Current location':'Manual grid'}`;
   maybeAutoMinimizeFloatingNav(current);
   if(mapReady&&current&&nav.end)drawNavigationLeg({...nav.start,lat:current.lat,lon:current.lon,gridRef:nav.mode==='live'?'LIVE POSITION':nav.start.gridRef,sheet:nav.start.sheet},nav.end,{fit:false});

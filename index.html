@@ -347,6 +347,55 @@ html,body{
   padding:8px 14px;border:1px solid rgba(57,255,106,.14);border-radius:999px;background:rgba(5,7,4,.88);
   backdrop-filter:blur(10px);
 }
+#screen-compass{
+  display:none;position:relative;overflow:auto;background:linear-gradient(180deg,rgba(3,5,3,.98),rgba(8,12,8,.99));padding:16px 14px 92px;
+}
+#screen-compass.active{display:block}
+.compass-container{
+  display:flex;flex-direction:column;gap:18px;max-width:1024px;margin:0 auto;min-height:100%;padding-bottom:24px;
+}
+.compass-status-header{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;
+}
+.compass-status-item{
+  background:rgba(7,10,7,.9);border:1px solid rgba(57,255,106,.16);border-radius:20px;padding:16px 18px;
+  display:flex;flex-direction:column;gap:6px;box-shadow:0 12px 35px rgba(0,0,0,.18);
+}
+.compass-status-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.compass-status-value{font-family:var(--mono);font-size:18px;color:var(--text);line-height:1.2;letter-spacing:.5px;}
+.compass-compass-wrapper{
+  display:flex;justify-content:center;align-items:center;padding:22px;background:rgba(7,10,7,.86);
+  border:1px solid rgba(57,255,106,.12);border-radius:32px;box-shadow:0 24px 60px rgba(0,0,0,.24);
+}
+.compass-svg{width:min(100%,460px);height:auto;display:block;filter:drop-shadow(0 20px 50px rgba(0,255,160,.08));}
+#compass-needle-group,
+#compass-bearing-line{
+  transition:transform .3s ease-out;
+  transform-origin:150px 150px;
+}
+#compass-bearing-line{opacity:.95;}
+#compass-needle-group polygon{filter:drop-shadow(0 0 12px rgba(255,68,68,.35));}
+.compass-cardinal,.compass-intercardinal{font-family:var(--mono);fill:var(--text);letter-spacing:1px;opacity:.92;}
+.compass-marks line{stroke:rgba(57,255,106,.2);stroke-width:1;}
+.compass-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+.compass-info-item{
+  background:rgba(8,11,8,.92);border:1px solid rgba(57,255,106,.14);border-radius:20px;padding:16px;
+}
+.compass-info-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.compass-info-value{font-family:var(--mono);font-size:15px;color:var(--text);line-height:1.4;}
+.compass-footer{display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px 12px 0;}
+.compass-message{font-family:var(--mono);font-size:12px;color:var(--accent2);text-align:center;line-height:1.4;}
+.compass-actions{display:flex;gap:10px;}
+#compass-end-nav-btn{padding:12px 18px;border-radius:14px;background:rgba(255,68,68,.16);border:1px solid rgba(255,68,68,.28);color:#ffb2b2;box-shadow:0 14px 30px rgba(255,68,68,.08);}
+#compass-end-nav-btn:hover{background:rgba(255,68,68,.24);}
+.compass-no-nav{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px 18px;
+  background:rgba(0,0,0,.4);border:1px solid rgba(57,255,106,.12);border-radius:26px;color:var(--muted);text-align:center;
+}
+@media(max-width:720px){
+  .compass-status-header{grid-template-columns:1fr;}
+  .compass-info-grid{grid-template-columns:1fr;}
+}
 
 #tactical-map{
   position:relative;flex:1 1 auto;min-height:100%;
@@ -994,6 +1043,11 @@ html,body{
         
         <div class="compass-compass-wrapper">
           <svg class="compass-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrowhead" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+                <path d="M0,0 L8,4 L0,8 Z" fill="#00c9a7" />
+              </marker>
+            </defs>
             <!-- Outer ring -->
             <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(57,255,106,.2)" stroke-width="2"/>
             
@@ -1015,7 +1069,7 @@ html,body{
             </g>
             
             <!-- Bearing line (shows destination) -->
-            <line id="compass-bearing-line" x1="150" y1="150" x2="150" y2="50" stroke="rgba(0,201,167,.6)" stroke-width="2" stroke-dasharray="4 4"/>
+            <line id="compass-bearing-line" x1="150" y1="150" x2="150" y2="40" stroke="rgba(0,201,167,.8)" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round" marker-end="url(#arrowhead)"/>
             
             <!-- Needle group that rotates -->
             <g id="compass-needle-group">
@@ -1037,7 +1091,7 @@ html,body{
               <div class="compass-info-value" id="compass-destination">—</div>
             </div>
             <div class="compass-info-item">
-              <div class="compass-info-label">Distance</div>
+              <div class="compass-info-label">Route Distance</div>
               <div class="compass-info-value" id="compass-distance">—</div>
             </div>
             <div class="compass-info-item">
@@ -1050,7 +1104,12 @@ html,body{
             </div>
           </div>
         </div>
-        
+        <div class="compass-footer">
+          <div class="compass-message" id="compass-message">Follow the needle towards your destination.</div>
+          <div class="compass-actions">
+            <button class="convert-btn" id="compass-end-nav-btn" onclick="endNavigation()" style="display:none">■ END NAVIGATION</button>
+          </div>
+        </div>
         <div class="compass-no-nav" id="compass-no-nav">
           <div style="font-size:48px;margin-bottom:16px">🧭</div>
           <div style="font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:0.5px;line-height:1.6;text-align:center">
@@ -1257,6 +1316,10 @@ function switchScreen(name){
     setTimeout(()=>{if(map)map.invalidateSize();},200);
     setTimeout(()=>{if(map)map.invalidateSize();},450);
   }
+  if(name==='compass'){
+    startUserLocationWatch({quiet:true});
+    updateCompassUI();
+  }
 }
 
 // ── MAP ──
@@ -1265,7 +1328,7 @@ let sheetRect=null,gridLayer=null,gridVisible=true;
 let navLegLayer=null,navLegMarkers=[];
 const MINUTES_PER_KM_DAY=20,MINUTES_PER_KM_NIGHT=6.6666667;
 const NAV_SPEEDS={foot:5,vehicle:40};
-let navStartMode='live',navTravelMode='foot',activeNavigation=null,navTicker=null;
+let navStartMode='live',navTravelMode='foot',activeNavigation=null,navTicker=null,compassArrivalNotified=false;
 let floatingNavMinimized=false,mapNavMinimized=true,lastNavPosition=null;
 let mapInfoVisible=false;
 
@@ -1660,15 +1723,26 @@ function setCompassBearing(deg){
   const bearingDisplay=document.getElementById('compass-bearing-display');
   const dirDisplay=document.getElementById('compass-direction-display');
   if(needle){
-    // compass needle rotates: 0° at North, clockwise to East
     needle.setAttribute('transform',`rotate(${deg} 150 150)`);
   }
   if(line){
-    // line already points North; rotate it same as needle
     line.setAttribute('transform',`rotate(${deg} 150 150)`);
   }
   if(bearingDisplay)bearingDisplay.textContent=formatBearing(deg);
   if(dirDisplay)dirDisplay.textContent=bearingLabel(deg);
+}
+
+function setCompassArrivalState(arrived){
+  const messageEl=document.getElementById('compass-message');
+  const endBtn=document.getElementById('compass-end-nav-btn');
+  if(messageEl){
+    messageEl.textContent=arrived
+      ?'You have arrived at destination — tap END NAVIGATION.'
+      :'Follow the needle towards your destination. Distance updates as you move.';
+  }
+  if(endBtn){
+    endBtn.style.display=arrived?'inline-flex':'none';
+  }
 }
 
 function updateCompassDuringNavigation(){
@@ -1681,7 +1755,6 @@ function updateCompassDuringNavigation(){
   const bearing=bearingBetween(current.lat,current.lon,nav.end.lat,nav.end.lon);
   const etaMinutes=(remainingKm/NAV_SPEEDS[nav.travelMode])*60;
 
-  // needle + labels
   setCompassBearing(bearing);
   const remainingEl=document.getElementById('compass-remaining');
   const etaEl=document.getElementById('compass-eta');
@@ -1692,6 +1765,44 @@ function updateCompassDuringNavigation(){
   if(distanceHead)distanceHead.textContent=formatDistance(nav.distanceKm);
   const destinationHead=document.getElementById('compass-destination');
   if(destinationHead)destinationHead.textContent=nav.end.gridRef;
+
+  const arrived = remainingKm <= 0.003;
+  setCompassArrivalState(arrived);
+  if(arrived && !compassArrivalNotified){
+    compassArrivalNotified=true;
+    setTimeout(()=>alert('You have arrived at destination.'), 50);
+  }
+}
+
+function updateCompassUI(){
+  const nav = activeNavigation || lastNavigationResult;
+  const noNav = !activeNavigation && !lastNavigationResult;
+  const noNavEl = document.getElementById('compass-no-nav');
+  if(noNavEl) noNavEl.style.display = noNav ? 'flex' : 'none';
+
+  if(!nav){
+    setCompassBearing(0);
+    document.getElementById('compass-destination').textContent='—';
+    document.getElementById('compass-distance').textContent='—';
+    document.getElementById('compass-remaining').textContent='—';
+    document.getElementById('compass-eta').textContent='—';
+    setCompassArrivalState(false);
+    return;
+  }
+
+  document.getElementById('compass-destination').textContent=nav.end?.gridRef||'—';
+  document.getElementById('compass-distance').textContent=formatDistance(nav.distanceKm||0);
+
+  if(activeNavigation){
+    updateCompassDuringNavigation();
+  } else {
+    const remainingKm = distanceBetween(nav.start.lat,nav.start.lon,nav.end.lat,nav.end.lon);
+    const bearing = bearingBetween(nav.start.lat,nav.start.lon,nav.end.lat,nav.end.lon);
+    setCompassBearing(bearing);
+    document.getElementById('compass-remaining').textContent=formatDistance(remainingKm);
+    document.getElementById('compass-eta').textContent=formatMinutes((remainingKm/NAV_SPEEDS[nav.travelMode])*60 || 0);
+    setCompassArrivalState(remainingKm <= 0.003);
+  }
 }
 
 function refreshActiveNavigation(){
@@ -1719,6 +1830,7 @@ function refreshActiveNavigation(){
 
   // Compass live updates (rotate needle + show remaining/ETA)
   updateCompassDuringNavigation();
+  if(currentScreen==='compass') updateCompassUI();
 
   if(remainingKm<=0.03){
     updateNavStatusChip('Arrived','active');
@@ -1728,6 +1840,7 @@ function refreshActiveNavigation(){
 function startNavigation(){
   if(!lastNavigationResult){showErr('g2g','Build a navigation leg first.');return;}
   activeNavigation={start:lastNavigationResult.start,end:lastNavigationResult.end,mode:navStartMode,travelMode:navTravelMode,startedAt:Date.now()};
+  compassArrivalNotified=false;
   updateNavStatusChip(activeNavigation.mode==='live'?'Live navigation':'Manual navigation','active');
   document.getElementById('nav-chip-source').textContent=`Start: ${activeNavigation.mode==='live'?'Current location':'Manual grid'}`;
   document.getElementById('nav-chip-travel').textContent=`Mode: ${activeNavigation.travelMode==='foot'?'Foot':'Vehicle'}`;
@@ -1744,6 +1857,7 @@ function startNavigation(){
 }
 function endNavigation(){
   activeNavigation=null;
+  compassArrivalNotified=false;
   if(navTicker)clearInterval(navTicker);
   navTicker=null;
   updateNavStatusChip('Idle');
@@ -1756,6 +1870,9 @@ function endNavigation(){
   updateFloatingNav('—','—','—','—','Idle');
   updateMapNavCard(lastNavigationResult);
   clearNavLeg();
+  setCompassArrivalState(false);
+  const endBtn=document.getElementById('compass-end-nav-btn');
+  if(endBtn)endBtn.style.display='none';
 }
 function toggleRuler(){
   if(!mapReady)return;

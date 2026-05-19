@@ -371,7 +371,9 @@ html,body{
 #compass-needle-group,
 #compass-bearing-line{
   transition:transform .3s ease-out;
-  transform-origin:150px 150px;
+  transform-origin:center center;
+  transform-box:view-box;
+  visibility:visible;
 }
 #compass-bearing-line{opacity:.95;}
 #compass-needle-group polygon{filter:drop-shadow(0 0 12px rgba(255,68,68,.35));}
@@ -1722,11 +1724,24 @@ function setCompassBearing(deg){
   const line=document.getElementById('compass-bearing-line');
   const bearingDisplay=document.getElementById('compass-bearing-display');
   const dirDisplay=document.getElementById('compass-direction-display');
+  if(isNaN(deg) || deg===null){
+    deg=0;
+  }
+  const transformValue=`rotate(${deg} 150 150)`;
+  const cssTransformValue=`rotate(${deg}deg)`;
   if(needle){
-    needle.setAttribute('transform',`rotate(${deg} 150 150)`);
+    needle.setAttribute('transform', transformValue);
+    needle.style.visibility='visible';
+    needle.style.transformOrigin='center center';
+    needle.style.transformBox='view-box';
+    needle.style.transform=cssTransformValue;
   }
   if(line){
-    line.setAttribute('transform',`rotate(${deg} 150 150)`);
+    line.setAttribute('transform', transformValue);
+    line.style.visibility='visible';
+    line.style.transformOrigin='center center';
+    line.style.transformBox='view-box';
+    line.style.transform=cssTransformValue;
   }
   if(bearingDisplay)bearingDisplay.textContent=formatBearing(deg);
   if(dirDisplay)dirDisplay.textContent=bearingLabel(deg);
@@ -1748,9 +1763,8 @@ function setCompassArrivalState(arrived){
 function updateCompassDuringNavigation(){
   const nav=activeNavigation;
   if(!nav)return;
-  if(nav.mode==='live'&& !userLatLng) return;
 
-  const current=(nav.mode==='live'&&userLatLng)?{lat:userLatLng.lat,lon:userLatLng.lng}:nav.start;
+  const current = (nav.mode==='live' && userLatLng) ? {lat:userLatLng.lat,lon:userLatLng.lng} : nav.start;
   const remainingKm=distanceBetween(current.lat,current.lon,nav.end.lat,nav.end.lon);
   const bearing=bearingBetween(current.lat,current.lon,nav.end.lat,nav.end.lon);
   const etaMinutes=(remainingKm/NAV_SPEEDS[nav.travelMode])*60;
@@ -1830,7 +1844,12 @@ function refreshActiveNavigation(){
 
   // Compass live updates (rotate needle + show remaining/ETA)
   updateCompassDuringNavigation();
+  // ensure compass needle updates even if user stayed on compass screen
   if(currentScreen==='compass') updateCompassUI();
+  else {
+    // keep compass needle visible for next compass open
+    updateCompassUI();
+  }
 
   if(remainingKm<=0.03){
     updateNavStatusChip('Arrived','active');
@@ -1854,7 +1873,12 @@ function startNavigation(){
   navTicker=setInterval(refreshActiveNavigation,1000);
   refreshActiveNavigation();
   showGridNavigationOnMap();
+  switchScreen('compass');
+  // Ensure the compass SVG is visible/painted before rotating the needle.
+  setTimeout(()=>updateCompassUI(),0);
+  setTimeout(()=>updateCompassUI(),150);
 }
+
 function endNavigation(){
   activeNavigation=null;
   compassArrivalNotified=false;

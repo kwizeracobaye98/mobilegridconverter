@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -396,14 +396,14 @@ html,body{
 .mib-val{font-family:var(--mono);font-size:clamp(12px,1.15vw,13px);color:var(--accent);line-height:1.5;overflow-wrap:anywhere}
 .mib-val.secondary{color:var(--accent2);font-size:clamp(11px,1.05vw,12px)}
 .map-nav-card{
-  position:absolute;right:12px;top:136px;width:clamp(156px,38vw,220px);z-index:420;
-  background:rgba(7,10,7,.95);border:1px solid rgba(57,255,106,.24);border-radius:14px;
-  box-shadow:0 14px 30px rgba(0,0,0,.32);padding:10px;display:none;touch-action:manipulation;
-  backdrop-filter:blur(10px)
+  position:absolute;left:50%;transform:translateX(-50%);right:auto;top:auto;bottom:92px;width:calc(100% - 32px);max-width:620px;z-index:420;
+  background:rgba(7,10,7,.95);border:1px solid rgba(57,255,106,.16);border-radius:18px;
+  box-shadow:0 14px 30px rgba(0,0,0,.28);padding:10px;display:none;touch-action:manipulation;
+  backdrop-filter:blur(12px)
 }
 .map-nav-card.show{display:block}
 .map-nav-card.minimized .map-nav-grid,.map-nav-card.minimized .map-nav-actions{display:none}
-.map-nav-card.minimized{width:clamp(132px,28vw,160px);padding:8px 10px}
+.map-nav-card.minimized{width:calc(100% - 24px);max-width:520px;left:12px;right:auto;padding:6px 10px}
 .map-nav-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .map-nav-card.minimized .map-nav-head{margin-bottom:0}
 .map-nav-title{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.9px;text-transform:uppercase}
@@ -844,6 +844,10 @@ html,body{
         <button class="map-icon-btn" id="btn-pin-sheet" onclick="togglePinSheet()" title="Show or hide pin cards">
           <span class="map-btn-icon">📍</span><span class="map-btn-text">Pins</span>
         </button>
+        <button class="map-icon-btn" id="btn-map-nav" onclick="toggleMapNavCard()" title="Show or hide navigation card">
+          <span class="map-btn-icon">🧭</span><span class="map-btn-text">Nav</span>
+        </button>
+
       </div>
 
       <div class="map-toolbar">
@@ -974,6 +978,88 @@ html,body{
       <div class="steps-box" id="g2g-steps"></div>
     </div>
 
+    <!-- SCREEN: Compass -->
+    <div class="screen" id="screen-compass">
+      <div class="compass-container">
+        <div class="compass-status-header">
+          <div class="compass-status-item">
+            <div class="compass-status-label">Bearing</div>
+            <div class="compass-status-value" id="compass-bearing-display">—</div>
+          </div>
+          <div class="compass-status-item">
+            <div class="compass-status-label">Direction</div>
+            <div class="compass-status-value" id="compass-direction-display">—</div>
+          </div>
+        </div>
+        
+        <div class="compass-compass-wrapper">
+          <svg class="compass-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer ring -->
+            <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(57,255,106,.2)" stroke-width="2"/>
+            
+            <!-- Cardinal directions -->
+            <text x="150" y="30" text-anchor="middle" class="compass-cardinal" font-size="18">N</text>
+            <text x="270" y="155" text-anchor="middle" class="compass-cardinal" font-size="18">E</text>
+            <text x="150" y="275" text-anchor="middle" class="compass-cardinal" font-size="18">S</text>
+            <text x="30" y="155" text-anchor="middle" class="compass-cardinal" font-size="18">W</text>
+            
+            <!-- Intercardinal directions -->
+            <text x="220" y="60" text-anchor="middle" class="compass-intercardinal" font-size="12">NE</text>
+            <text x="240" y="220" text-anchor="middle" class="compass-intercardinal" font-size="12">SE</text>
+            <text x="60" y="220" text-anchor="middle" class="compass-intercardinal" font-size="12">SW</text>
+            <text x="60" y="60" text-anchor="middle" class="compass-intercardinal" font-size="12">NW</text>
+            
+            <!-- Degree marks -->
+            <g id="compass-degree-marks" class="compass-marks">
+              <!-- Generated via JS -->
+            </g>
+            
+            <!-- Bearing line (shows destination) -->
+            <line id="compass-bearing-line" x1="150" y1="150" x2="150" y2="50" stroke="rgba(0,201,167,.6)" stroke-width="2" stroke-dasharray="4 4"/>
+            
+            <!-- Needle group that rotates -->
+            <g id="compass-needle-group">
+              <!-- North-pointing needle (red) -->
+              <polygon points="150,50 145,100 150,85 155,100" fill="#ff4444" stroke="none"/>
+              <!-- South counterweight -->
+              <polygon points="150,250 145,200 150,215 155,200" fill="rgba(100,100,100,.6)" stroke="none"/>
+            </g>
+            
+            <!-- Center circle -->
+            <circle cx="150" cy="150" r="8" fill="var(--accent)" stroke="var(--accent2)" stroke-width="2"/>
+          </svg>
+        </div>
+        
+        <div class="compass-nav-info">
+          <div class="compass-info-grid">
+            <div class="compass-info-item">
+              <div class="compass-info-label">Destination</div>
+              <div class="compass-info-value" id="compass-destination">—</div>
+            </div>
+            <div class="compass-info-item">
+              <div class="compass-info-label">Distance</div>
+              <div class="compass-info-value" id="compass-distance">—</div>
+            </div>
+            <div class="compass-info-item">
+              <div class="compass-info-label">Remaining</div>
+              <div class="compass-info-value" id="compass-remaining">—</div>
+            </div>
+            <div class="compass-info-item">
+              <div class="compass-info-label">ETA</div>
+              <div class="compass-info-value" id="compass-eta">—</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="compass-no-nav" id="compass-no-nav">
+          <div style="font-size:48px;margin-bottom:16px">🧭</div>
+          <div style="font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:0.5px;line-height:1.6;text-align:center">
+            Start navigation from<br><strong>Grid Nav</strong> to follow<br>bearing on compass
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /screen-wrap -->
 
   <!-- BOTTOM NAV -->
@@ -993,6 +1079,10 @@ html,body{
     <button class="nav-btn" id="nav-map" onclick="switchScreen('map')">
       <span class="nav-icon">🗺</span>
       <span>Map</span>
+    </button>
+    <button class="nav-btn" id="nav-compass" onclick="switchScreen('compass')">
+      <span class="nav-icon">🧭</span>
+      <span>Compass</span>
     </button>
   </nav>
 </div>
@@ -1503,7 +1593,22 @@ function setMapNavCardMinimized(minimized){
   card.classList.toggle('minimized',minimized);
   btn.textContent=minimized?'▶':'▼';
 }
-function toggleMapNavCard(){setMapNavCardMinimized(!mapNavMinimized);}
+function toggleMapNavCard(){
+  const card=document.getElementById('map-nav-card');
+  if(!card)return;
+  const isVisible=card.classList.contains('show');
+
+  if(!isVisible){
+    // show (expanded)
+    setMapNavCardVisibility(true);
+    setMapNavCardMinimized(false);
+    updateMapNavCard(lastNavigationResult);
+  }else{
+    // hide but keep minimized mode for next open
+    setMapNavCardMinimized(true);
+    setMapNavCardVisibility(false);
+  }
+}
 function updateMapNavCard(nav=lastNavigationResult){
   const distEl=document.getElementById('map-nav-distance');
   const timeEl=document.getElementById('map-nav-time');
@@ -1549,6 +1654,46 @@ function maybeAutoMinimizeFloatingNav(current){
   if(delta>=0.01&&!floatingNavMinimized)setFloatingNavMinimized(true);
   lastNavPosition={...current};
 }
+function setCompassBearing(deg){
+  const needle=document.getElementById('compass-needle-group');
+  const line=document.getElementById('compass-bearing-line');
+  const bearingDisplay=document.getElementById('compass-bearing-display');
+  const dirDisplay=document.getElementById('compass-direction-display');
+  if(needle){
+    // compass needle rotates: 0° at North, clockwise to East
+    needle.setAttribute('transform',`rotate(${deg} 150 150)`);
+  }
+  if(line){
+    // line already points North; rotate it same as needle
+    line.setAttribute('transform',`rotate(${deg} 150 150)`);
+  }
+  if(bearingDisplay)bearingDisplay.textContent=formatBearing(deg);
+  if(dirDisplay)dirDisplay.textContent=bearingLabel(deg);
+}
+
+function updateCompassDuringNavigation(){
+  const nav=activeNavigation;
+  if(!nav)return;
+  if(nav.mode==='live'&& !userLatLng) return;
+
+  const current=(nav.mode==='live'&&userLatLng)?{lat:userLatLng.lat,lon:userLatLng.lng}:nav.start;
+  const remainingKm=distanceBetween(current.lat,current.lon,nav.end.lat,nav.end.lon);
+  const bearing=bearingBetween(current.lat,current.lon,nav.end.lat,nav.end.lon);
+  const etaMinutes=(remainingKm/NAV_SPEEDS[nav.travelMode])*60;
+
+  // needle + labels
+  setCompassBearing(bearing);
+  const remainingEl=document.getElementById('compass-remaining');
+  const etaEl=document.getElementById('compass-eta');
+  if(remainingEl)remainingEl.textContent=formatDistance(remainingKm);
+  if(etaEl)etaEl.textContent=formatMinutes(etaMinutes);
+
+  const distanceHead=document.getElementById('compass-distance');
+  if(distanceHead)distanceHead.textContent=formatDistance(nav.distanceKm);
+  const destinationHead=document.getElementById('compass-destination');
+  if(destinationHead)destinationHead.textContent=nav.end.gridRef;
+}
+
 function refreshActiveNavigation(){
   if(!activeNavigation)return;
   const nav=activeNavigation;
@@ -1571,6 +1716,10 @@ function refreshActiveNavigation(){
   document.getElementById('map-nav-sub').textContent=`Navigation running · ${nav.mode==='live'?'Current location':'Manual grid'}`;
   maybeAutoMinimizeFloatingNav(current);
   if(mapReady&&current&&nav.end)drawNavigationLeg({...nav.start,lat:current.lat,lon:current.lon,gridRef:nav.mode==='live'?'LIVE POSITION':nav.start.gridRef,sheet:nav.start.sheet},nav.end,{fit:false});
+
+  // Compass live updates (rotate needle + show remaining/ETA)
+  updateCompassDuringNavigation();
+
   if(remainingKm<=0.03){
     updateNavStatusChip('Arrived','active');
     updateFloatingNav(distanceText,'Arrived',bearingText,elapsedText,'Destination reached');
@@ -1771,10 +1920,19 @@ function togglePinSheet(){
   const sheet=document.getElementById('pin-sheet');
   const chevron=document.getElementById('pin-sheet-chevron');
   const btn=document.getElementById('btn-pin-sheet');
+
+  // nav card is independent from pins; do not change #map-nav-card here.
+
   sheet.classList.toggle('open',pinSheetOpen);
   btn?.classList.toggle('active-layer',pinSheetOpen);
+
   // shift the map content so the sidebar does not overlay map elements
   document.getElementById('screen-map')?.classList.toggle('sidebar-open',pinSheetOpen);
+
+  // Pins sheet is independent from the navigation card.
+  // (navigation card visibility is controlled by its own button + route state)
+
+
   if(chevron)chevron.textContent=pinSheetOpen?'▼ Collapse':'▲ Expand';
 }
 

@@ -313,8 +313,8 @@ html,body{
 #screen-map.active{display:flex}
 
 .map-toolbar{
-  position:absolute;top:12px;left:12px;right:12px;z-index:460;
-  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;pointer-events:none;
+  position:absolute;top:16px;right:12px;left:auto;z-index:460;
+  display:flex;align-items:flex-end;justify-content:flex-end;gap:10px;pointer-events:none;
   flex-wrap:wrap;
 }
 .map-tool-group{
@@ -351,6 +351,36 @@ html,body{
 #tactical-map{
   position:relative;flex:1 1 auto;min-height:100%;
   width:100%;background:#060a06;
+}
+
+/* ── MAP LAYERS & COORDS BAR ── */
+.map-layers-coords{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:430;
+  width:min(calc(100% - 32px),500px);background:rgba(5,7,4,.95);border:1px solid rgba(57,255,106,.16);
+  border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;backdrop-filter:blur(12px);
+  box-shadow:0 14px 30px rgba(0,0,0,.28);
+}
+.map-layers-group{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.map-layers-group button{padding:7px 10px;font-size:8px;border-radius:8px;min-width:50px}
+.map-coords-display{
+  font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.5px;
+  text-align:center;line-height:1.6;display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+.map-coords-item{background:rgba(0,0,0,.2);padding:8px;border-radius:6px}
+.map-coords-label{font-size:8px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+.map-coords-value{font-size:11px;color:var(--accent2);word-break:break-word}
+/* Left vertical tool column */
+.map-side-tools{
+  position:absolute;left:12px;top:16px;z-index:470;display:flex;flex-direction:column;gap:8px;pointer-events:auto;
+}
+.map-side-tools .map-icon-btn{min-width:48px;padding:10px 12px;border-radius:10px;display:flex;align-items:center;gap:8px}
+
+#screen-map.sidebar-open .map-layers-coords{left:50%}
+
+@media(min-width:768px){
+  #screen-map.sidebar-open .map-layers-coords{
+    left:auto;right:calc(16px + min(360px, calc(100% - 32px)) + 12px);transform:none;
+  }
 }
 
 /* ── MAP INFO BAR ── */
@@ -398,29 +428,30 @@ html,body{
 .map-screen:-ms-fullscreen .map-nav-card,
 .map-screen:-webkit-full-screen .map-nav-card{right:16px;top:144px;left:auto;bottom:auto;transform:none;z-index:1000}
 
-/* ── HISTORY / PIN PANEL (bottom sheet on map) ── */
+/* ── HISTORY / PIN PANEL (bottom sheet on small screens, sidebar on larger screens) ── */
 .pin-sheet{
-  position:absolute;bottom:92px;left:12px;right:12px;
-  background:var(--panel);border-top:1px solid var(--border2);border-radius:16px 16px 0 0;
-  transform:translateY(calc(100% - 48px));transition:transform .3s cubic-bezier(.4,0,.2,1);
-  max-height:min(58%,480px);z-index:500;display:flex;flex-direction:column;
-  border:1px solid rgba(57,255,106,.16);border-radius:18px;box-shadow:0 18px 36px rgba(0,0,0,.35);
-  backdrop-filter:blur(10px);
+  position:fixed;left:12px;right:12px;bottom:12px;
+  background:var(--panel);border:1px solid rgba(57,255,106,.16);border-radius:18px;
+  max-height:46vh;min-height:220px;z-index:550;display:none;flex-direction:column;
+  width:auto;max-width:calc(100% - 24px);backdrop-filter:blur(10px);
+  box-shadow:0 18px 36px rgba(0,0,0,.35);transform:translateY(100%);
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
 }
-.pin-sheet.open{transform:translateY(0)}
+.pin-sheet.open{display:flex;transform:translateY(0)}
 .pin-sheet-handle{
-  padding:12px 16px 8px;display:flex;align-items:center;justify-content:space-between;
-  cursor:pointer;flex-shrink:0;
+  padding:12px 14px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;flex-shrink:0;border-bottom:1px solid var(--border);
 }
-.pin-sheet-drag{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 8px}
-.pin-sheet-title{font-family:var(--mono);font-size:11px;color:var(--accent2);letter-spacing:1px;text-transform:uppercase}
-.pin-sheet-count{font-family:var(--mono);font-size:9px;color:var(--muted)}
-.pin-actions{display:flex;gap:6px;padding:6px 12px;flex-shrink:0;overflow-x:auto;border-bottom:1px solid var(--border)}
+.pin-sheet-drag{width:3px;height:32px;background:var(--border2);border-radius:2px;margin:0 auto 0 0}
+.pin-sheet-title{font-family:var(--mono);font-size:10px;color:var(--accent2);letter-spacing:1px;text-transform:uppercase}
+.pin-sheet-count{font-family:var(--mono);font-size:8px;color:var(--muted)}
+.pin-actions{display:flex;gap:4px;padding:8px 10px;flex-shrink:0;overflow-x:auto;border-bottom:1px solid var(--border);flex-wrap:wrap;order:2}
+.history-list{order:1;overflow-y:auto;padding:8px 10px}
 .pin-actions::-webkit-scrollbar{display:none}
 .pin-actions button{
-  white-space:nowrap;font-family:var(--mono);font-size:clamp(10px,1vw,11px);letter-spacing:.7px;
-  padding:9px 12px;background:rgba(57,255,106,.06);border:1px solid var(--border2);
-  color:var(--muted);cursor:pointer;border-radius:6px;text-transform:uppercase;transition:all .15s;flex-shrink:0;
+  white-space:nowrap;font-family:var(--mono);font-size:clamp(8px,.9vw,9px);letter-spacing:.6px;
+  padding:6px 8px;background:rgba(57,255,106,.06);border:1px solid var(--border2);
+  color:var(--muted);cursor:pointer;border-radius:5px;text-transform:uppercase;transition:all .15s;flex-shrink:0;
 }
 .pin-actions .btn-route{border-color:var(--accent2);color:var(--accent2)}
 .pin-actions .btn-report{border-color:var(--warn);color:var(--warn)}
@@ -431,7 +462,9 @@ html,body{
 .history-item{
   background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;
   padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;
+  display:flex;flex-direction:column;
 }
+
 .history-item.active-pin{border-color:var(--accent);background:rgba(57,255,106,.05)}
 .history-item:active{background:rgba(57,255,106,.08)}
 .hi-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
@@ -439,8 +472,9 @@ html,body{
 .hi-grid{font-family:var(--mono);font-size:clamp(14px,1.4vw,16px);color:var(--accent);flex:1;letter-spacing:1px;overflow-wrap:anywhere}
 .hi-src{font-family:var(--mono);font-size:9px;color:var(--dim);padding:2px 5px;border:1px solid var(--border);border-radius:3px}
 .hi-del{background:none;border:none;color:var(--err);font-size:16px;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0}
-.hi-name{font-family:var(--mono);font-size:clamp(11px,1.05vw,12px);color:var(--text);margin-bottom:4px;line-height:1.5}
-.hi-dms{font-family:var(--mono);font-size:clamp(10px,.95vw,11px);color:var(--muted);letter-spacing:.2px;line-height:1.6;overflow-wrap:anywhere}
+.hi-name{font-family:var(--mono);font-size:clamp(11px,1.05vw,12px);color:var(--text);margin-bottom:6px;line-height:1.5}
+.hi-dms{font-family:var(--mono);font-size:clamp(10px,.95vw,11px);color:var(--muted);letter-spacing:.2px;line-height:1.6;overflow-wrap:anywhere;margin-bottom:6px}
+
 .hi-distance{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:4px;margin-top:4px;display:inline-block}
 .hi-distance.delta{background:rgba(0,201,167,.1);color:var(--accent2);border:1px solid rgba(0,201,167,.2)}
 .hi-route-check{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--muted);cursor:pointer;margin-top:4px}
@@ -555,10 +589,13 @@ html,body{
   .map-btn-icon{font-size:14px}
   .mib-item{min-width:calc(50% - 8px);flex-basis:calc(50% - 8px)}
   .map-nav-card{right:8px;top:180px;width:clamp(140px,45vw,170px)}
+  .map-side-tools{left:8px;top:8px;gap:6px}
+  .map-side-tools .map-icon-btn{min-width:auto;padding:10px 10px;font-size:9px;justify-content:center}
   .map-coords-bar{top:68px;font-size:9px;padding:6px 12px}
   .map-ruler-output{top:104px;font-size:9px}
   .map-info-bar{bottom:80px;left:8px;right:8px}
-  .pin-sheet{bottom:80px;left:8px;right:8px}
+  .pin-sheet{left:8px;right:8px;bottom:calc(12px + var(--nav-h) + var(--safe-bottom));max-height:50vh;min-height:180px;border-radius:16px;display:none;transform:translateY(100%)}
+  .pin-sheet.open{display:flex;transform:translateY(0)}
 }
 
 @media(min-width:768px){
@@ -566,7 +603,13 @@ html,body{
   #screen-g2c > *,
   #screen-c2g > *{width:min(100%,1040px)}
   .info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .pin-sheet{left:auto;right:16px;bottom:88px;width:min(360px,calc(100% - 32px))}
+  .pin-sheet{
+    left:auto;right:16px;top:88px;bottom:16px;
+    width:min(360px,calc(100% - 32px));max-width:360px;
+    max-height:calc(100vh - 120px);min-height:220px;
+    transform:translateX(100%);
+  }
+  .pin-sheet.open{transform:translateX(0)}
   .floating-nav-bar{width:min(calc(100% - 32px),var(--app-max));bottom:calc(var(--nav-h) + var(--safe-bottom) + 12px)}
 }
 
@@ -626,7 +669,7 @@ html,body{
       <div class="meta-chip">TM CM=30°E</div>
       <div class="meta-chip">Acc <span>&lt;1m</span></div>
     </div>
-    <div class="hdr-sheet-tag">Sheet: <span id="hdr-sheet-name">GAKO</span> &nbsp;|&nbsp; <span id="hdr-anchor-note" style="font-size:8px">Anchor: 201515 ↔ 02°14'49.319"S / 30°10'50.464"E</span></div>
+    <div class="hdr-sheet-tag">Sheet: <span id="hdr-sheet-name">GAKO</span> &nbsp;|&nbsp; <span id="hdr-anchor-note" style="font-size:8px">Anchor: 201515 ↔ 02°14'49.319"S / 30°10'50.464"E</span><br><span id="topo-ref-note" style="font-size:8px;color:var(--muted)">Topo ref: <span id="topo-ref-dms"></span></span></div>
   </div>
 
   <!-- SHEET SELECTOR -->
@@ -761,8 +804,8 @@ html,body{
 
     <!-- SCREEN: Map -->
     <div class="screen map-screen" id="screen-map">
-      <div class="map-toolbar">
-        <div class="map-tool-group primary">
+      <div class="map-layers-coords">
+        <div class="map-layers-group">
           <button class="map-icon-btn active-layer" id="btn-layer-osm" onclick="setLayer('osm')" title="Street map">
             <span class="map-btn-icon">🗺</span><span class="map-btn-text">Street</span>
           </button>
@@ -776,28 +819,34 @@ html,body{
             <span class="map-btn-icon">#</span><span class="map-btn-text">Grid On</span>
           </button>
         </div>
-        <div class="map-tool-group secondary">
-          <button class="map-icon-btn" onclick="fitSheet()" title="Fit active sheet">
-            <span class="map-btn-icon">⌖</span><span class="map-btn-text">Sheet</span>
-          </button>
-          <button class="map-icon-btn" id="btn-map-fullscreen" onclick="toggleMapFullscreen()" title="Toggle fullscreen map">
-            <span class="map-btn-icon">⛶</span><span class="map-btn-text">Full</span>
-          </button>
-          <button class="map-icon-btn map-locate-btn" id="btn-locate" onclick="ensureUserLocation({quiet:false,centerOnFound:true,zoom:15})" title="Center on my location">
-            <span class="map-btn-icon">⊙</span><span class="map-btn-text">Me</span>
-          </button>
-          <button class="map-icon-btn map-ruler-btn" id="btn-ruler" onclick="toggleRuler()" title="Measure from live location">
-            <span class="map-btn-icon">📏</span><span class="map-btn-text">Ruler</span>
-          </button>
-          <button class="map-icon-btn" id="btn-map-info" onclick="toggleMapInfoBar()" title="Show or hide info">
-            <span class="map-btn-icon">ℹ</span><span class="map-btn-text">Info</span>
-          </button>
-          <button class="map-icon-btn" id="btn-pin-sheet" onclick="togglePinSheet()" title="Show or hide pins">
-            <span class="map-btn-icon">📍</span><span class="map-btn-text">Pins</span>
-          </button>
-        </div>
+        <div class="map-coords-bar" id="map-cursor-coords">Tap map · coordinates appear here</div>
       </div>
-      <div class="map-coords-bar" id="map-cursor-coords">Tap map · coordinates appear here</div>
+
+      <!-- Left vertical tool column (non-overlapping) -->
+      <div class="map-side-tools" id="map-side-tools" aria-hidden="false">
+        <button class="map-icon-btn" onclick="fitSheet()" title="Fit active sheet">
+          <span class="map-btn-icon">⌖</span><span class="map-btn-text">Sheet</span>
+        </button>
+        <button class="map-icon-btn" id="btn-map-fullscreen" onclick="toggleMapFullscreen()" title="Toggle fullscreen map">
+          <span class="map-btn-icon">⛶</span><span class="map-btn-text">Full</span>
+        </button>
+        <button class="map-icon-btn map-locate-btn" id="btn-locate" onclick="ensureUserLocation({quiet:false,centerOnFound:true,zoom:15})" title="Center on my location">
+          <span class="map-btn-icon">⊙</span><span class="map-btn-text">Me</span>
+        </button>
+        <button class="map-icon-btn map-ruler-btn" id="btn-ruler" onclick="toggleRuler()" title="Measure from live location">
+          <span class="map-btn-icon">📏</span><span class="map-btn-text">Ruler</span>
+        </button>
+        <button class="map-icon-btn" id="btn-map-info" onclick="toggleMapInfoBar()" title="Show or hide info">
+          <span class="map-btn-icon">ℹ</span><span class="map-btn-text">Info</span>
+        </button>
+        <button class="map-icon-btn" id="btn-pin-sheet" onclick="togglePinSheet()" title="Show or hide pin cards">
+          <span class="map-btn-icon">📍</span><span class="map-btn-text">Pins</span>
+        </button>
+      </div>
+
+      <div class="map-toolbar">
+        <div class="map-tool-group secondary"></div>
+      </div>
       <div id="ruler-output" class="map-ruler-output" style="display:none">Ruler off</div>
       <div id="tactical-map" style="flex:1;min-height:0"></div>
       <div class="map-nav-card minimized" id="map-nav-card">
@@ -844,7 +893,7 @@ html,body{
           <button class="btn-clear" onclick="clearHistory()">✕ Clear</button>
         </div>
         <div class="history-list" id="history-list">
-          <div class="no-pins">No pins yet · convert a grid ref or tap the map to pin a location.</div>
+          <div class="no-pins">No pins yet · tap the map to add pins.</div>
         </div>
       </div>
     </div>
@@ -1162,8 +1211,14 @@ function initMap(){
     const latlng=e.latlng;
     try{
       const r=doGeoToGrid(Math.abs(latlng.lat),latlng.lng);
-      document.getElementById('map-cursor-coords').textContent=`GR ${r.gridRef} · ${latlng.lat.toFixed(5)}°, ${latlng.lng.toFixed(5)}°`;
-    }catch{document.getElementById('map-cursor-coords').textContent=`${latlng.lat.toFixed(5)}°, ${latlng.lng.toFixed(5)}° (outside sheet)`;}
+      document.getElementById('map-cursor-coords').textContent=`GR ${r.gridRef} · ${fmtDMS(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S')} · ${fmtDMS(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E')}`;
+    }catch{
+      const latDMS=dec2dms(latlng.lat);
+      const lonDMS=dec2dms(latlng.lng);
+      const latText=fmtDMS(latDMS.d,latDMS.m,latDMS.s,latlng.lat<0?'S':'N');
+      const lonText=fmtDMS(lonDMS.d,lonDMS.m,lonDMS.s,latlng.lng<0?'W':'E');
+      document.getElementById('map-cursor-coords').textContent=`${latText}, ${lonText} (outside sheet)`;
+    }
   });
   ['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(evt=>document.addEventListener(evt,handleMapFullscreenChange));
   startUserLocationWatch({quiet:true});
@@ -1236,12 +1291,24 @@ function drawNavigationLeg(start,end,opts={}){
 function addPin(obj){
   pinCounter++;
   const id=`pin-${pinCounter}`;
-  const lat=obj.lat||(-obj.latS),lon=obj.lon||obj.lonE;
-  const pin={...obj,id,lat,lon,forRoute:false,_m:null};
+  let lat=obj.lat||(-obj.latS),lon=obj.lon||obj.lonE;
+
+  // Topo pins must appear "above" the reference GR 184589 (-2.18043, 30.16537).
+  // Implemented as a popup offset (not moving the actual coordinate).
+  const topoRef={lat:-2.18043,lon:30.16537};
+  const isTopoRef=(activeLayer==='topo' && Math.abs(lat-topoRef.lat)<0.00002 && Math.abs(lon-topoRef.lon)<0.00002);
+
+  const pin={...obj,id,lat,lon,forRoute:false,_m:null,_topoRef:isTopoRef};
   if(pins.length>0){const prev=pins[pins.length-1];const km=distanceBetween(prev.lat,prev.lon,lat,lon);pin.prevDistance=formatDistance(km);}
   if(userLatLng){const km=distanceBetween(userLatLng.lat,userLatLng.lng,lat,lon);pin.distanceToUser=formatDistance(km);}
   const marker=L.marker([lat,lon],{icon:L.divIcon({className:'',html:'<div class="tac-marker"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(map);
-  marker.bindPopup(`<b style="font-size:13px;color:#39ff6a">${escapeHtml(pin.name)}</b><br>GR ${pin.gridRef}<br>${pin.latDMSstr}<br>${pin.lonDMSstr}<div class="popup-actions"><button onclick="jumpToPin(${pins.length})">Focus</button><button onclick="navigateToPin(${pins.length})">Nav</button><button onclick="window.open('${googleMapsUrl(lat,lon)}','_blank','noopener')">Maps</button><button class="delete" onclick="removePin(${pins.length})">Remove</button></div>`);
+  const popupContent=`<b style="font-size:13px;color:#39ff6a">${escapeHtml(pin.name)}</b><br>GR ${pin.gridRef}`+
+    `<br>${pin.latDMSstr}`+
+    `<br>${pin.lonDMSstr}`+
+    `<div class="popup-actions"><button onclick="jumpToPin(${pins.length})">Focus</button><button onclick="navigateToPin(${pins.length})">Nav</button><button onclick="window.open('${googleMapsUrl(lat,lon)}','_blank','noopener')">Maps</button><button class="delete" onclick="removePin(${pins.length})">Remove</button></div>`;
+
+  const popupOptions=pin._topoRef?{offset:[0,-30]}:{};
+  marker.bindPopup(popupContent,popupOptions);
   pin._m=marker;
   pins.push(pin);
   activePin=pins.length-1;
@@ -1330,7 +1397,14 @@ function navigateToPin(i){
 }
 function removePin(i){if(pins[i]&&pins[i]._m)map.removeLayer(pins[i]._m);pins.splice(i,1);renderHistory();if(!pins.length){setMapInfoVisible(false);document.getElementById('pin-count').textContent='(0)';}}
 function clearHistory(){pins.forEach(p=>{if(p._m)map.removeLayer(p._m);});pins.length=0;renderHistory();setMapInfoVisible(false);routes.forEach(r=>{if(r.layer)map.removeLayer(r.layer);});routes.length=0;clearNavLeg();}
-function setLayer(name){Object.values(layers).forEach(l=>{if(map.hasLayer(l))map.removeLayer(l);});layers[name].addTo(map);['osm','sat','topo'].forEach(n=>{document.getElementById(`btn-layer-${n}`)?.classList.remove('active-layer');});document.getElementById(`btn-layer-${name}`).classList.add('active-layer');}
+let activeLayer='osm';
+function setLayer(name){
+  activeLayer=name;
+  Object.values(layers).forEach(l=>{if(map.hasLayer(l))map.removeLayer(l);});
+  layers[name].addTo(map);
+  ['osm','sat','topo'].forEach(n=>{document.getElementById(`btn-layer-${n}`)?.classList.remove('active-layer');});
+  document.getElementById(`btn-layer-${name}`).classList.add('active-layer');
+}
 function fitSheet(){if(mapReady)map.fitBounds(activeSheet.mapBounds,{padding:[20,20]});}
 function isMapFullscreen(){
   const el=document.getElementById('screen-map');
@@ -1697,6 +1771,8 @@ function togglePinSheet(){
   const btn=document.getElementById('btn-pin-sheet');
   sheet.classList.toggle('open',pinSheetOpen);
   btn?.classList.toggle('active-layer',pinSheetOpen);
+  // shift the map content so the sidebar does not overlay map elements
+  document.getElementById('screen-map')?.classList.toggle('sidebar-open',pinSheetOpen);
   if(chevron)chevron.textContent=pinSheetOpen?'▼ Collapse':'▲ Expand';
 }
 
@@ -1708,7 +1784,20 @@ document.addEventListener('keydown',e=>{
   else if(currentScreen==='g2g')convertGridToGrid();
 });
 
-window.addEventListener('load',()=>{document.getElementById('login-password')?.focus();setNavStartMode('live');setNavTravelMode('foot');});
+window.addEventListener('load',()=>{
+  document.getElementById('login-password')?.focus();
+  setNavStartMode('live');
+  setNavTravelMode('foot');
+  // Reference for topo popup positioning: GR 184589 · -2.18043°, 30.16537° (display as DMS)
+  const refLat=-2.18043;
+  const refLon=30.16537;
+  const latD=dec2dms(Math.abs(refLat));
+  const lonD=dec2dms(refLon);
+  const latStr=fmtDMS(latD.d,latD.m,latD.s,'S');
+  const lonStr=fmtDMS(lonD.d,lonD.m,lonD.s,'E');
+  const dEl=document.getElementById('topo-ref-dms');
+  if(dEl)dEl.textContent=`${latStr} · ${lonStr}`;
+});
 </script>
 </body>
 </html>

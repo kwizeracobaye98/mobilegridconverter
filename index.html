@@ -322,12 +322,6 @@ html,body{
   align-items:center;
 }
 .map-tool-group.secondary{justify-content:flex-end;margin-left:auto}
-.map-coords-bar{
-  position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:430;
-  width:min(calc(100% - 32px),480px);background:rgba(5,7,4,.84);border:1px solid rgba(57,255,106,.16);
-  border-radius:999px;padding:8px 14px;font-family:var(--mono);font-size:10px;color:var(--accent2);
-  letter-spacing:.45px;text-align:center;backdrop-filter:blur(10px);
-}
 .map-icon-btn{
   display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:46px;min-height:42px;
   background:rgba(7,10,7,.88);border:1px solid rgba(57,255,106,.18);color:var(--muted);
@@ -407,9 +401,7 @@ html,body{
 /* ── MAP LAYERS & COORDS BAR ── */
 .map-layers-coords{
   position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:430;
-  width:min(calc(100% - 32px),500px);background:rgba(5,7,4,.95);border:1px solid rgba(57,255,106,.16);
-  border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;backdrop-filter:blur(12px);
-  box-shadow:0 14px 30px rgba(0,0,0,.28);
+  width:min(calc(100% - 32px),500px);display:flex;flex-direction:column;gap:8px;
 }
 .map-layers-group{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
 .map-layers-group button{padding:7px 10px;font-size:8px;border-radius:8px;min-width:50px}
@@ -417,13 +409,15 @@ html,body{
   display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;
 }
 .map-search-input{
-  width:100%;border:1px solid rgba(57,255,106,.2);border-radius:10px;background:rgba(0,0,0,.28);
+  width:100%;border:1px solid rgba(57,255,106,.18);border-radius:14px;background:rgba(7,10,7,.72);
   color:var(--text);padding:11px 12px;font-family:var(--mono);font-size:11px;letter-spacing:.45px;outline:none;
+  backdrop-filter:blur(10px);box-shadow:0 10px 22px rgba(0,0,0,.18);
 }
 .map-search-input:focus{border-color:var(--accent2);box-shadow:0 0 0 2px rgba(0,201,167,.14)}
 .map-search-btn{
-  border:1px solid var(--accent2);background:rgba(0,201,167,.08);color:var(--accent2);border-radius:10px;
+  border:1px solid rgba(0,201,167,.34);background:rgba(7,10,7,.72);color:var(--accent2);border-radius:14px;
   padding:11px 14px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;
+  backdrop-filter:blur(10px);box-shadow:0 10px 22px rgba(0,0,0,.18);
 }
 .map-search-hint{
   font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.4px;line-height:1.5;text-align:center;
@@ -659,7 +653,6 @@ html,body{
   .map-nav-card{right:8px;bottom:calc(12px + var(--nav-h) + var(--safe-bottom));width:clamp(140px,45vw,170px)}
   .map-side-tools{left:8px;top:8px;gap:6px}
   .map-side-tools .map-icon-btn{min-width:auto;padding:10px 10px;font-size:9px;justify-content:center}
-  .map-coords-bar{bottom:80px;font-size:9px;padding:6px 12px}
   .map-ruler-output{bottom:128px;font-size:9px}
   .map-info-bar{bottom:80px;left:8px;right:8px}
   .map-side-tools{left:8px;top:50%;transform:translateY(-50%);gap:6px}
@@ -900,8 +893,6 @@ html,body{
           </button>
         </div>
       </div>
-      <div class="map-coords-bar" id="map-cursor-coords">Tap map · coordinates appear here</div>
-
       <!-- Left vertical tool column (non-overlapping) -->
       <div class="map-side-tools" id="map-side-tools" aria-hidden="false">
         <button class="map-icon-btn" onclick="fitSheet()" title="Fit active sheet">
@@ -1427,13 +1418,7 @@ function initMap(){
     const latlng=e.latlng;
     try{
       const r=doGeoToGrid(Math.abs(latlng.lat),latlng.lng);
-      document.getElementById('map-cursor-coords').textContent=`GR ${r.gridRef} · ${fmtDMS(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S')} · ${fmtDMS(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E')}`;
     }catch{
-      const latDMS=dec2dms(latlng.lat);
-      const lonDMS=dec2dms(latlng.lng);
-      const latText=fmtDMS(latDMS.d,latDMS.m,latDMS.s,latlng.lat<0?'S':'N');
-      const lonText=fmtDMS(lonDMS.d,lonDMS.m,lonDMS.s,latlng.lng<0?'W':'E');
-      document.getElementById('map-cursor-coords').textContent=`${latText}, ${lonText} (outside sheet)`;
     }
   });
   ['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(evt=>document.addEventListener(evt,handleMapFullscreenChange));

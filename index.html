@@ -413,6 +413,21 @@ html,body{
 }
 .map-layers-group{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
 .map-layers-group button{padding:7px 10px;font-size:8px;border-radius:8px;min-width:50px}
+.map-search-bar{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;
+}
+.map-search-input{
+  width:100%;border:1px solid rgba(57,255,106,.2);border-radius:10px;background:rgba(0,0,0,.28);
+  color:var(--text);padding:11px 12px;font-family:var(--mono);font-size:11px;letter-spacing:.45px;outline:none;
+}
+.map-search-input:focus{border-color:var(--accent2);box-shadow:0 0 0 2px rgba(0,201,167,.14)}
+.map-search-btn{
+  border:1px solid var(--accent2);background:rgba(0,201,167,.08);color:var(--accent2);border-radius:10px;
+  padding:11px 14px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;
+}
+.map-search-hint{
+  font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.4px;line-height:1.5;text-align:center;
+}
 .map-coords-display{
   font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.5px;
   text-align:center;line-height:1.6;display:grid;grid-template-columns:1fr 1fr;gap:8px;
@@ -636,6 +651,8 @@ html,body{
   .map-tool-group{gap:6px;max-width:100%;flex:1 1 auto;justify-content:center;flex-wrap:wrap}
   .map-tool-group.secondary{justify-content:center;margin-left:0;flex-wrap:wrap}
   .map-icon-btn{padding:10px 8px;border-radius:10px;min-width:auto;flex:1 1 calc(33.333% - 5px);min-height:38px;font-size:8px;gap:4px}
+  .map-search-bar{grid-template-columns:1fr}
+  .map-search-btn{width:100%}
   .map-btn-text{display:none}
   .map-btn-icon{font-size:14px}
   .mib-item{min-width:calc(50% - 8px);flex-basis:calc(50% - 8px)}
@@ -858,6 +875,16 @@ html,body{
     <!-- SCREEN: Map -->
     <div class="screen map-screen" id="screen-map">
       <div class="map-layers-coords">
+        <div class="map-search-bar">
+          <input
+            type="text"
+            id="map-search-input"
+            class="map-search-input"
+            placeholder="Search grid or DMS, e.g. 201515 or 02 14 49.319 S, 30 10 50.464 E"
+            aria-label="Search grid reference or DMS coordinates">
+          <button class="map-search-btn" type="button" onclick="searchMapPoint()">Search</button>
+        </div>
+        <div class="map-search-hint">Search by 6-digit grid or DMS pair</div>
         <div class="map-layers-group">
           <button class="map-icon-btn active-layer" id="btn-layer-osm" onclick="setLayer('osm')" title="Street map">
             <span class="map-btn-icon">🗺</span><span class="map-btn-text">Street</span>
@@ -872,8 +899,8 @@ html,body{
             <span class="map-btn-icon">#</span><span class="map-btn-text">Grid On</span>
           </button>
         </div>
-        <div class="map-coords-bar" id="map-cursor-coords">Tap map · coordinates appear here</div>
       </div>
+      <div class="map-coords-bar" id="map-cursor-coords">Tap map · coordinates appear here</div>
 
       <!-- Left vertical tool column (non-overlapping) -->
       <div class="map-side-tools" id="map-side-tools" aria-hidden="false">
@@ -1256,6 +1283,38 @@ function resolveGridReference(gridStr){
   if(!sheet)throw new Error(`Grid ${gridStr} is outside all loaded sheets`);
   return doGridToGeoOnSheet(gridStr,sheet);
 }
+function parseDmsComponent(part,type){
+  const cleaned=String(part||'').trim().toUpperCase().replace(/[′’]/g,"'").replace(/[″”]/g,'"');
+  const hemiMatch=cleaned.match(/[NSEW]/);
+  if(!hemiMatch)throw new Error(`Missing ${type==='lat'?'N/S':'E/W'} hemisphere in DMS search`);
+  const hemi=hemiMatch[0];
+  const nums=cleaned.match(/\d+(?:\.\d+)?/g);
+  if(!nums||nums.length===0)throw new Error(`Invalid ${type==='lat'?'latitude':'longitude'} DMS search`);
+  const deg=Number(nums[0]),min=Number(nums[1]||0),sec=Number(nums[2]||0);
+  if(min>=60||sec>=60)throw new Error('Minutes and seconds must be below 60');
+  const dec=deg+min/60+sec/3600;
+  if(type==='lat'){
+    if(!/[NS]/.test(hemi))throw new Error('Latitude must end with N or S');
+    return hemi==='S'?-dec:dec;
+  }
+  if(!/[EW]/.test(hemi))throw new Error('Longitude must end with E or W');
+  return hemi==='W'?-dec:dec;
+}
+function resolveGeoDmsSearch(query){
+  const parts=String(query||'').trim().split(/\s*[,;]\s*/).filter(Boolean);
+  if(parts.length!==2)throw new Error('Use DMS like 02 14 49.319 S, 30 10 50.464 E');
+  const lat=parseDmsComponent(parts[0],'lat');
+  const lon=parseDmsComponent(parts[1],'lon');
+  const latS=Math.abs(lat),lonE=lon;
+  const sheet=findSheetForGeo(latS,lonE);
+  if(!sheet)throw new Error('Coordinates are outside all loaded sheets');
+  return doGeoToGridOnSheet(latS,lonE,sheet);
+}
+function resolveMapSearch(query){
+  const trimmed=String(query||'').trim();
+  if(!trimmed)throw new Error('Enter a grid reference or DMS coordinates');
+  return /^\d{6}$/.test(trimmed)?resolveGridReference(trimmed):resolveGeoDmsSearch(trimmed);
+}
 function resolveLiveStart(){
   if(!userLatLng)throw new Error('Current location not available yet. Tap allow location, then build navigation again.');
   const lat=userLatLng.lat,lon=userLatLng.lng,latS=Math.abs(lat);
@@ -1454,8 +1513,9 @@ function addPin(obj){
   // Implemented as a popup offset (not moving the actual coordinate).
   const topoRef={lat:-2.18043,lon:30.16537};
   const isTopoRef=(activeLayer==='topo' && Math.abs(lat-topoRef.lat)<0.00002 && Math.abs(lon-topoRef.lon)<0.00002);
+  const isBottomPopupGrid=String(obj.gridRef||'')==='207557';
 
-  const pin={...obj,id,lat,lon,forRoute:false,_m:null,_topoRef:isTopoRef};
+  const pin={...obj,id,lat,lon,forRoute:false,_m:null,_topoRef:isTopoRef,_bottomPopup:isBottomPopupGrid};
   if(pins.length>0){const prev=pins[pins.length-1];const km=distanceBetween(prev.lat,prev.lon,lat,lon);pin.prevDistance=formatDistance(km);}
   if(userLatLng){const km=distanceBetween(userLatLng.lat,userLatLng.lng,lat,lon);pin.distanceToUser=formatDistance(km);}
   const marker=L.marker([lat,lon],{icon:L.divIcon({className:'',html:'<div class="tac-marker"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(map);
@@ -1464,7 +1524,7 @@ function addPin(obj){
     `<br>${pin.lonDMSstr}`+
     `<div class="popup-actions"><button onclick="jumpToPin(${pins.length})">Focus</button><button onclick="navigateToPin(${pins.length})">Nav</button><button onclick="window.open('${googleMapsUrl(lat,lon)}','_blank','noopener')">Maps</button><button class="delete" onclick="removePin(${pins.length})">Remove</button></div>`;
 
-  const popupOptions=pin._topoRef?{offset:[0,-30]}:{};
+  const popupOptions=pin._topoRef?{offset:[0,-30]}:(pin._bottomPopup?{offset:[0,30]}:{});
   marker.bindPopup(popupContent,popupOptions);
   pin._m=marker;
   pins.push(pin);
@@ -2037,6 +2097,37 @@ function copyResult(t){
   navigator.clipboard.writeText(txt).then(()=>{btn.textContent='✓ COPIED';btn.classList.add('copied');setTimeout(()=>{btn.textContent='⧉ COPY';btn.classList.remove('copied');},1800);});
 }
 
+function searchMapPoint(){
+  try{
+    const input=document.getElementById('map-search-input');
+    const query=input?.value.trim()||'';
+    const result=resolveMapSearch(query);
+    if(result.sheet.id!==activeSheet.id)selectSheet(result.sheet.id);
+    switchScreen('map');
+    setTimeout(()=>{
+      if(map)map.invalidateSize();
+      const pinName=/^\d{6}$/.test(query)?`Search ${result.gridRef}`:`Search ${fmtDMS(result.latDMS.d,result.latDMS.m,result.latDMS.s,'S')} · ${fmtDMS(result.lonDMS.d,result.lonDMS.m,result.lonDMS.s,'E')}`;
+      addPin({
+        gridRef:result.gridRef,
+        latS:result.latS,
+        lonE:result.lon,
+        lat:result.lat,
+        lon:result.lon,
+        latDMSstr:fmtDMS(result.latDMS.d,result.latDMS.m,result.latDMS.s,'S'),
+        lonDMSstr:fmtDMS(result.lonDMS.d,result.lonDMS.m,result.lonDMS.s,'E'),
+        stdE:result.stdE,
+        stdN:result.stdN,
+        src:'search',
+        name:pinName,
+        sheet:result.sheet.name
+      });
+      map.setView([result.lat,result.lon],Math.max(map.getZoom(),15));
+    },250);
+  }catch(e){
+    alert(e.message);
+  }
+}
+
 function goToMap(){if(!lastResult)return;switchScreen('map');setTimeout(()=>{if(map)map.invalidateSize();addPin({...lastResult});},250);}
 function showGridNavigationOnMap(){
   if(!lastNavigationResult)return;
@@ -2080,6 +2171,7 @@ function togglePinSheet(){
 // ── KEYBOARD ──
 document.addEventListener('keydown',e=>{
   if(e.key!=='Enter')return;
+  if(document.activeElement?.id==='map-search-input'){searchMapPoint();return;}
   if(currentScreen==='g2c')convertGrid();
   else if(currentScreen==='c2g')convertGeo();
   else if(currentScreen==='g2g')convertGridToGrid();

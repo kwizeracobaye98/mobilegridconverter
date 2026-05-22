@@ -346,6 +346,8 @@ html,body{
     radial-gradient(circle at top,rgba(255,198,70,.08),transparent 28%),
     linear-gradient(180deg,#050607 0%,#0b0d0b 55%,#11130f 100%);
   padding:18px 14px 92px;
+  -webkit-overflow-scrolling:touch;
+  touch-action:auto;
 }
 #screen-compass.active{display:block}
 .compass-container{
@@ -591,21 +593,28 @@ html,body{
   display:flex;gap:6px;backdrop-filter:blur(10px);
   z-index:200;
 }
-.app.map-focus{padding-bottom:calc(54px + var(--safe-bottom))}
+.app.map-focus,
+.app.compass-focus{padding-bottom:calc(54px + var(--safe-bottom))}
 .app.map-focus .auth-banner,
 .app.map-focus .app-header,
-.app.map-focus .sheet-bar{
+.app.map-focus .sheet-bar,
+.app.compass-focus .auth-banner,
+.app.compass-focus .app-header,
+.app.compass-focus .sheet-bar{
   max-height:0;opacity:0;overflow:hidden;pointer-events:none;border-width:0;padding-top:0;padding-bottom:0;
 }
-.app.map-focus .bottom-nav{
+.app.map-focus .bottom-nav,
+.app.compass-focus .bottom-nav{
   width:auto;min-width:220px;bottom:10px;height:auto;padding:6px 8px calc(6px + var(--safe-bottom));
   border:1px solid rgba(57,255,106,.18);border-radius:20px;background:rgba(7,10,7,.88);
   box-shadow:0 16px 30px rgba(0,0,0,.32);
 }
-.app.map-focus .nav-btn{
+.app.map-focus .nav-btn,
+.app.compass-focus .nav-btn{
   min-width:48px;min-height:44px;padding:8px;border-radius:12px;
 }
-.app.map-focus .nav-btn span:last-child{display:none}
+.app.map-focus .nav-btn span:last-child,
+.app.compass-focus .nav-btn span:last-child{display:none}
 .nav-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:4px;background:rgba(57,255,106,.04);border:1px solid transparent;cursor:pointer;padding:8px 4px;
@@ -1409,7 +1418,9 @@ function switchScreen(name){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(`screen-${name}`).classList.add('active');
   document.getElementById(`nav-${name}`).classList.add('active');
-  document.getElementById('app')?.classList.toggle('map-focus',name==='map');
+  const app=document.getElementById('app');
+  app?.classList.toggle('map-focus',name==='map');
+  app?.classList.toggle('compass-focus',name==='compass');
   currentScreen=name;
   if(name==='map'){
     initMap();

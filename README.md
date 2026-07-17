@@ -11,7 +11,8 @@ This project is the mobile edition of the Rwanda Grid Converter. It is designed 
 - Convert `6-digit grid references` to `WGS84 geographic coordinates`
 - Convert `WGS84 coordinates` back to `6-digit grid references`
 - Work with `decimal` or `DMS` coordinate input
-- Use a full-screen interactive `Leaflet` map
+- Use a full-screen interactive `Leaflet` map that works online and offline
+- See a live connection indicator showing whether the app is online or offline
 - Get your current phone location with `Me`
 - Add pins directly from conversion results or by tapping the map
 - Build simple routes from selected pins
@@ -101,6 +102,7 @@ Current unlock password in this build: `kwizera2026`
 - The layout is optimized for phones and touch interaction.
 - Geolocation depends on browser permission being allowed on the phone.
 - For the best experience, add the page to the home screen if your browser supports it.
+- The app caches its core files and map assets so it can keep working offline after the first successful load.
 - Some browsers may block the report popup until popups are allowed.
 
 ## Technical Notes
@@ -110,6 +112,7 @@ Current unlock password in this build: `kwizera2026`
 - All logic is contained in `index.html`.
 - Sheet calibration, anchors, and grid constants are stored directly in the `SHEETS` configuration in `index.html`.
 - Navigation UI, floating bar, and map navigation card are also implemented directly in `index.html`.
+- A service worker and local assets allow the app to run online and offline with the same interface.
 
 ## Support
 

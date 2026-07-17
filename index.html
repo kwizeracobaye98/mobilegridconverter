@@ -7,11 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0c0a">
+<link rel="manifest" href="./manifest.json">
+<link rel="stylesheet" href="./leaflet.css" />
 <title>Rwanda Grid Converter</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:      #0a0c0a;
@@ -84,6 +82,17 @@ html,body{
 .app{
   display:flex;flex-direction:column;height:100%;min-height:100dvh;width:min(100%,var(--app-max));margin:0 auto;position:relative;
   padding-bottom:calc(var(--nav-h) + var(--safe-bottom));
+}
+.connection-chip{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;
+  border:1px solid rgba(57,255,106,.25);background:rgba(57,255,106,.08);color:var(--accent2);
+  font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;
+}
+.connection-chip.offline{
+  border-color:rgba(255,183,72,.35);background:rgba(255,183,72,.12);color:var(--warn);
+}
+.connection-chip .dot{
+  width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;
 }
 .app-header{
   background:var(--panel);border-bottom:2px solid var(--accent);
@@ -759,7 +768,7 @@ html,body{
 <!-- LOGIN OVERLAY -->
 <div class="login-overlay" id="login-overlay">
   <div class="login-card">
-    <img src="image.png" alt="ASRAT GROUP GAKO" class="login-logo" onerror="this.onerror=null;this.style.display='none';document.getElementById('logo-placeholder').style.display='flex'">
+    <img src="image.png" alt="© KWIZERA JP GAKO 2026" class="login-logo" onerror="this.onerror=null;this.style.display='none';document.getElementById('logo-placeholder').style.display='flex'">
     <div class="login-logo-placeholder" id="logo-placeholder" style="display:none">ASRAT<br>GROUP<br>GAKO</div>
     <div class="login-title">Grid Converter</div>
     <div class="login-subtitle">Authenticate to unlock</div>
@@ -769,20 +778,21 @@ html,body{
     </label>
     <button class="login-btn" id="login-submit" type="button">▶ UNLOCK</button>
     <div class="login-error" id="login-message"></div>
-    <div class="login-copy">ASRAT GROUP GAKO<br>Help line: Kwizera - 0781845528<br>Copyright© 2026 · All rights reserved.</div>
+    <div class="login-copy">© KWIZERA JP GAKO 2026<br>Help line: Kwizera - 0781845528<br>Copyright© 2026 · All rights reserved.</div>
   </div>
 </div>
 
 <!-- APP -->
 <div class="app" id="app" style="display:none">
   <!-- AUTH BANNER -->
-  <div class="auth-banner" id="auth-banner" style="display:none">🔓 Access granted · ASRAT GROUP GAKO</div>
+  <div class="auth-banner" id="auth-banner" style="display:none">🔓 Access granted · © KWIZERA JP GAKO 2026</div>
 
   <!-- HEADER -->
   <div class="app-header">
     <div class="hdr-row">
       <div class="hdr-title">⊕ Grid Converter</div>
       <div class="hdr-actions">
+        <div class="connection-chip" id="connection-chip" title="Connection status"><span class="dot"></span><span id="connection-state">Online</span></div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">Multi-Sheet · WGS84</div>
         <button class="signout-btn" id="signout-btn" type="button">Sign Out</button>
       </div>
@@ -1267,6 +1277,16 @@ const loginBtn = document.getElementById('login-submit');
 const appRoot = document.getElementById('app');
 const authBanner = document.getElementById('auth-banner');
 const signoutBtn = document.getElementById('signout-btn');
+const connectionChip = document.getElementById('connection-chip');
+const connectionState = document.getElementById('connection-state');
+
+function updateConnectionStatus() {
+  if (!connectionChip || !connectionState) return;
+  const online = navigator.onLine;
+  connectionChip.classList.toggle('offline', !online);
+  connectionState.textContent = online ? 'Online' : 'Offline';
+  connectionChip.title = online ? 'Connected to the network' : 'Working offline';
+}
 
 function persistAuthState(isSignedIn) {
   try {
@@ -1320,6 +1340,9 @@ function attemptLogin() {
 loginBtn.addEventListener('click', attemptLogin);
 passwordInput.addEventListener('keypress', e => { if (e.key === 'Enter') attemptLogin(); });
 signoutBtn?.addEventListener('click', signOutApplication);
+window.addEventListener('online', updateConnectionStatus);
+window.addEventListener('offline', updateConnectionStatus);
+updateConnectionStatus();
 
 // ── GEODETIC CONSTANTS ──
 const WGS84_A  = 6378137.0;
@@ -1427,6 +1450,24 @@ function resolveLiveStart(){
   };
 }
 
+function showMapOfflineNotice(){
+  const mapScreen=document.getElementById('screen-map');
+  if(!mapScreen||document.getElementById('map-offline-banner'))return;
+  const banner=document.createElement('div');
+  banner.id='map-offline-banner';
+  banner.style.cssText='position:absolute;left:12px;right:12px;top:12px;z-index:400;padding:10px 12px;border-radius:10px;background:rgba(7,10,7,.95);border:1px solid rgba(255,183,48,.3);color:#ffb830;font-family:var(--mono);font-size:10px;letter-spacing:1px;line-height:1.5;';
+  banner.innerHTML='Offline mode · map tiles and live map features are unavailable. Grid conversions still work.';
+  mapScreen.appendChild(banner);
+}
+
+function ensureLeaflet(){
+  if(typeof window.L === 'undefined'){
+    showMapOfflineNotice();
+    return false;
+  }
+  return true;
+}
+
 // ── SHEET MANAGEMENT ──
 function selectSheet(id){
   if(!SHEETS[id])return;
@@ -1450,7 +1491,7 @@ function selectSheet(id){
   document.getElementById('c2g-steps-btn').style.display='none';
   document.getElementById('g2c-err').classList.remove('show');
   document.getElementById('c2g-err').classList.remove('show');
-  if(mapReady){
+  if(mapReady && ensureLeaflet()){
     if(sheetRect)map.removeLayer(sheetRect);
     if(gridLayer)map.removeLayer(gridLayer);
     sheetRect=L.rectangle(activeSheet.mapBounds,{color:'#39ff6a',weight:1.5,opacity:.7,fillColor:'#39ff6a',fillOpacity:.03,dashArray:'6 4'}).addTo(map);
@@ -1473,7 +1514,7 @@ function switchScreen(name){
   currentScreen=name;
   if(name==='map'){
     initMap();
-    setTimeout(()=>{if(map)map.invalidateSize();},200);
+    setTimeout(()=>{if(map)map.invalidateSize();},180);
     setTimeout(()=>{if(map)map.invalidateSize();},450);
   }
   if(name==='compass'){
@@ -1503,39 +1544,54 @@ function setMapButtonLabel(id,label){
 
 function initMap(){
   if(mapReady)return;
-  const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'',maxZoom:19});
-  const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'',maxZoom:19});
-  const topo=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{attribution:'',maxZoom:17});
-  layers={osm,sat,topo};
-  map=L.map('tactical-map',{center:activeSheet.center,zoom:activeSheet.zoom,layers:[osm],zoomControl:false,attributionControl:false,tapTolerance:15});
-  mapReady=true;
-  sheetRect=L.rectangle(activeSheet.mapBounds,{color:'#39ff6a',weight:1.5,opacity:.7,fillColor:'#39ff6a',fillOpacity:.03,dashArray:'6 4'}).addTo(map);
-  gridLayer=buildSheetGridLayer(activeSheet);
-  syncGridVisibility();
-  map.on('click',e=>{
-    if(rulerMode)return;
-    const latlng=e.latlng;
-    try{
-      const matchedSheet=findSheetForGeo(Math.abs(latlng.lat),latlng.lng);
-      if(!matchedSheet){alert('Outside loaded sheet bounds');return;}
-      if(matchedSheet.id!==activeSheet.id)selectSheet(matchedSheet.id);
-      const r=doGeoToGrid(Math.abs(latlng.lat),latlng.lng);
-      const name=prompt('Pin name (optional)','');
-      addPin({gridRef:r.gridRef,latS:Math.abs(latlng.lat),lonE:latlng.lng,lat:latlng.lat,lon:latlng.lng,latDMSstr:fmtDMS(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S'),lonDMSstr:fmtDMS(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E'),stdE:r.stdE,stdN:r.stdN,src:'map',name:name||`Pin ${pinCounter+1}`,sheet:activeSheet.name});
-    }catch(e){console.warn('Map click outside grid',e);}
-  });
-  map.on('mousemove',e=>{
-    const latlng=e.latlng;
-    try{
-      const r=doGeoToGrid(Math.abs(latlng.lat),latlng.lng);
-    }catch{
+  const mapContainer=document.getElementById('tactical-map');
+  if(!mapContainer)return;
+  if(!ensureLeaflet()){
+    mapContainer.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ffb830;font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:16px;text-align:center">Map library could not be loaded. Please refresh the page.</div>';
+    return;
+  }
+  requestAnimationFrame(()=>{
+    if(mapReady)return;
+    if(!navigator.onLine){
+      mapContainer.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ffb830;font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:16px;text-align:center">Live map tiles need an internet connection. Please reconnect and try again.</div>';
+      return;
     }
+    const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:['a','b','c'],crossOrigin:true});
+    const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,crossOrigin:true});
+    const topo=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,subdomains:['a','b','c'],crossOrigin:true});
+    layers={osm,sat,topo};
+    map=L.map('tactical-map',{center:activeSheet.center,zoom:activeSheet.zoom,layers:[osm],zoomControl:false,attributionControl:false,tapTolerance:15});
+    mapReady=true;
+    sheetRect=L.rectangle(activeSheet.mapBounds,{color:'#39ff6a',weight:1.5,opacity:.7,fillColor:'#39ff6a',fillOpacity:.03,dashArray:'6 4'}).addTo(map);
+    gridLayer=buildSheetGridLayer(activeSheet);
+    syncGridVisibility();
+    map.on('click',e=>{
+      if(rulerMode)return;
+      const latlng=e.latlng;
+      try{
+        const matchedSheet=findSheetForGeo(Math.abs(latlng.lat),latlng.lng);
+        if(!matchedSheet){alert('Outside loaded sheet bounds');return;}
+        if(matchedSheet.id!==activeSheet.id)selectSheet(matchedSheet.id);
+        const r=doGeoToGrid(Math.abs(latlng.lat),latlng.lng);
+        const name=prompt('Pin name (optional)','');
+        addPin({gridRef:r.gridRef,latS:Math.abs(latlng.lat),lonE:latlng.lng,lat:latlng.lat,lon:latlng.lng,latDMSstr:fmtDMS(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S'),lonDMSstr:fmtDMS(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E'),stdE:r.stdE,stdN:r.stdN,src:'map',name:name||`Pin ${pinCounter+1}`,sheet:activeSheet.name});
+      }catch(e){console.warn('Map click outside grid',e);}
+    });
+    map.on('mousemove',e=>{
+      const latlng=e.latlng;
+      try{
+        const r=doGeoToGrid(Math.abs(latlng.lat),latlng.lng);
+      }catch{
+      }
+    });
+    ['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(evt=>document.addEventListener(evt,handleMapFullscreenChange));
+    startUserLocationWatch({quiet:true});
+    setTimeout(()=>{if(map)map.invalidateSize();},150);
   });
-  ['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(evt=>document.addEventListener(evt,handleMapFullscreenChange));
-  startUserLocationWatch({quiet:true});
 }
 
 function buildSheetGridLayer(sheet=activeSheet){
+  if(!ensureLeaflet())return null;
   const group=L.layerGroup();
   const majorEvery=10,minorEvery=5;
   const verticalSamples=gE=>{const start=gridToStdTM(gE,sheet.gN_min,sheet),end=gridToStdTM(gE,sheet.gN_max,sheet);return[tmStd_toGeo(start.stdE,start.stdN),tmStd_toGeo(end.stdE,end.stdN)].map(p=>[p.latDeg,p.lonDeg]);};
@@ -1589,6 +1645,7 @@ function buildNavVector(start,end){
   return`${eastLabel} · ${northLabel}`;
 }
 function drawNavigationLeg(start,end,opts={}){
+  if(!ensureLeaflet())return;
   if(!mapReady)initMap();
   const shouldFit=opts.fit!==false;
   clearNavLeg();
@@ -1601,6 +1658,7 @@ function drawNavigationLeg(start,end,opts={}){
   if(shouldFit)map.fitBounds(L.latLngBounds([[start.lat,start.lon],[end.lat,end.lon]]),{padding:[30,30]});
 }
 function addPin(obj){
+  if(!ensureLeaflet())return;
   pinCounter++;
   const id=`pin-${pinCounter}`;
   let lat=obj.lat||(-obj.latS),lon=obj.lon||obj.lonE;
@@ -1675,8 +1733,11 @@ function renderHistory(){
       <label class="hi-route-check" onclick="event.stopPropagation()"><input type="checkbox" ${p.forRoute?'checked':''} onchange="togglePinForRoute('${p.id}',this.checked)"> Include in Route</label>
     </div>`).join('');
 }
-function jumpToPin(i){activePin=i;const o=pins[i];pins.forEach((p,j)=>{if(p._m)p._m.setIcon(L.divIcon({className:'',html:'<div class="tac-marker tac-old"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]}));});if(o._m){o._m.setIcon(L.divIcon({className:'',html:'<div class="tac-marker"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]}));o._m.openPopup();map.setView([o.lat,o.lon],Math.max(map.getZoom(),13));}updateInfoBar(o);renderHistory();}
+function jumpToPin(i){
+  if(!ensureLeaflet())return;
+  activePin=i;const o=pins[i];pins.forEach((p,j)=>{if(p._m)p._m.setIcon(L.divIcon({className:'',html:'<div class="tac-marker tac-old"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]}));});if(o._m){o._m.setIcon(L.divIcon({className:'',html:'<div class="tac-marker"><div class="tac-ring"></div><div class="tac-dot"></div></div>',iconSize:[28,28],iconAnchor:[14,14]}));o._m.openPopup();map.setView([o.lat,o.lon],Math.max(map.getZoom(),13));}updateInfoBar(o);renderHistory();}
 function navigateToPin(i){
+  if(!ensureLeaflet())return;
   const p=pins[i];
   if(!p)return;
   try{
@@ -1712,11 +1773,12 @@ function removePin(i){if(pins[i]&&pins[i]._m)map.removeLayer(pins[i]._m);pins.sp
 function clearHistory(){pins.forEach(p=>{if(p._m)map.removeLayer(p._m);});pins.length=0;renderHistory();setMapInfoVisible(false);routes.forEach(r=>{if(r.layer)map.removeLayer(r.layer);});routes.length=0;clearNavLeg();}
 let activeLayer='osm';
 function setLayer(name){
+  if(!mapReady||!layers[name])return;
   activeLayer=name;
-  Object.values(layers).forEach(l=>{if(map.hasLayer(l))map.removeLayer(l);});
+  Object.values(layers).forEach(l=>{if(l&&map.hasLayer(l))map.removeLayer(l);});
   layers[name].addTo(map);
   ['osm','sat','topo'].forEach(n=>{document.getElementById(`btn-layer-${n}`)?.classList.remove('active-layer');});
-  document.getElementById(`btn-layer-${name}`).classList.add('active-layer');
+  document.getElementById(`btn-layer-${name}`)?.classList.add('active-layer');
 }
 function fitSheet(){if(mapReady)map.fitBounds(activeSheet.mapBounds,{padding:[20,20]});}
 function isMapFullscreen(){
@@ -2373,6 +2435,7 @@ function copyResult(t){
 }
 
 function searchMapPoint(){
+  if(!ensureLeaflet()){alert('Map features are unavailable while offline.');return;}
   try{
     const input=document.getElementById('map-search-input');
     const query=input?.value.trim()||'';
@@ -2403,8 +2466,9 @@ function searchMapPoint(){
   }
 }
 
-function goToMap(){if(!lastResult)return;switchScreen('map');setTimeout(()=>{if(map)map.invalidateSize();addPin({...lastResult});},250);}
+function goToMap(){if(!lastResult)return;if(!ensureLeaflet()){alert('Map features are unavailable while offline.');return;}switchScreen('map');setTimeout(()=>{if(map)map.invalidateSize();addPin({...lastResult});},250);}
 function showGridNavigationOnMap(){
+  if(!ensureLeaflet()){alert('Map features are unavailable while offline.');return;}
   if(!lastNavigationResult)return;
   const focusSheet=lastNavigationResult.start.sheet.id===lastNavigationResult.end.sheet.id?lastNavigationResult.start.sheet.id:lastNavigationResult.start.sheet.id;
   if(focusSheet!==activeSheet.id)selectSheet(focusSheet);
@@ -2459,6 +2523,9 @@ window.addEventListener('load',()=>{
   setNavTravelMode('foot');
   buildCompassDegreeMarks();
   startCompassSensor();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('Service worker registration failed',err));
+  }
   // Reference for topo popup positioning: GR 184589 · -2.18043°, 30.16537° (display as DMS)
   const refLat=-2.18043;
   const refLon=30.16537;
@@ -2470,5 +2537,7 @@ window.addEventListener('load',()=>{
   if(dEl)dEl.textContent=`${latStr} · ${lonStr}`;
 });
 </script>
+<script src="./leaflet.js"></script>
+<script src="./offline-map-layer.js"></script>
 </body>
 </html>

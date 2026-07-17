@@ -166,12 +166,12 @@ html,body{
 .field input{
   width:100%;border:1px solid var(--border2);border-radius:10px;
   background:rgba(5,7,4,.8);color:var(--text);
-  padding:14px 14px;font-family:var(--sans);font-size:17px;letter-spacing:.5px;
+  padding:10px 10px;font-family:var(--sans);font-size:15px;letter-spacing:.5px;
   outline:none;transition:border-color .2s,box-shadow .2s;
   -webkit-appearance:none;appearance:none;
 }
 .field input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(57,255,106,.15)}
-.dms-row{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px}
+.dms-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:start}
 
 .mode-toggle{display:flex;gap:0;margin-bottom:14px;border:1px solid var(--border2);border-radius:8px;overflow:hidden}
 .mode-btn{flex:1;padding:10px;font-family:var(--mono);font-size:10px;letter-spacing:1px;background:transparent;border:none;color:var(--muted);cursor:pointer;text-transform:uppercase;transition:all .15s}
@@ -703,11 +703,11 @@ html,body{
   .hdr-title{font-size:15px;letter-spacing:1px}
   .hdr-sheet-tag{line-height:1.5}
   .result-header{flex-wrap:wrap}
-  .dms-row,
   .result-grid,
   .info-grid,
   .nav-status-grid,
   .floating-nav-grid{grid-template-columns:1fr}
+  .dms-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
   .result-item.gridref{grid-column:1}
   .result-item.gridref .r-value{font-size:18px;letter-spacing:2px}
   .bottom-nav{padding-inline:4px;gap:4px}

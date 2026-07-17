@@ -268,10 +268,15 @@ html,body{
 .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .result-item{background:rgba(0,0,0,.3);border-radius:8px;padding:12px}
 .result-item.gridref{grid-column:1/-1}
+.result-item.dms-output-item{grid-column:1/-1}
 .r-label{font-family:var(--mono);font-size:clamp(10px,1vw,11px);color:var(--muted);letter-spacing:.7px;text-transform:uppercase;margin-bottom:6px;line-height:1.4}
 .r-value{font-family:var(--mono);font-size:clamp(15px,1.6vw,18px);color:var(--accent);word-break:break-word;line-height:1.45}
 .result-item.secondary .r-value{font-size:clamp(13px,1.3vw,15px);color:var(--accent2)}
 .result-item.gridref .r-value{font-size:clamp(20px,2.2vw,28px);letter-spacing:clamp(1px,.4vw,3px)}
+.dms-output-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dms-output-box{display:inline-flex;align-items:baseline;justify-content:center;gap:2px;min-width:50px;padding:6px 8px;border:1px solid rgba(57,255,106,.25);border-radius:8px;background:rgba(0,0,0,.25);font-family:var(--mono);font-size:clamp(12px,1.15vw,14px);color:var(--accent2)}
+.dms-output-box .dms-output-unit{font-size:8px;opacity:.8;color:var(--muted)}
+.dms-output-hemisphere{padding:4px 7px;border:1px solid var(--border2);border-radius:999px;font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
 
 .copy-btn{
   font-family:var(--mono);font-size:clamp(10px,1vw,11px);padding:7px 12px;
@@ -837,8 +842,8 @@ html,body{
         <div class="result-precision" id="g2c-prec"></div>
         <div class="result-body">
           <div class="result-grid">
-            <div class="result-item"><div class="r-label">Latitude (DMS)</div><div class="r-value" id="out-lat-dms">—</div></div>
-            <div class="result-item"><div class="r-label">Longitude (DMS)</div><div class="r-value" id="out-lon-dms">—</div></div>
+            <div class="result-item dms-output-item"><div class="r-label">Latitude (DMS)</div><div class="r-value" id="out-lat-dms">—</div></div>
+            <div class="result-item dms-output-item"><div class="r-label">Longitude (DMS)</div><div class="r-value" id="out-lon-dms">—</div></div>
             <div class="result-item secondary"><div class="r-label">Latitude (Decimal°)</div><div class="r-value" id="out-lat-dec">—</div></div>
             <div class="result-item secondary"><div class="r-label">Longitude (Decimal°)</div><div class="r-value" id="out-lon-dec">—</div></div>
             <div class="result-item secondary"><div class="r-label">Distance</div><div class="r-value" id="out-distance">—</div></div>
@@ -872,11 +877,11 @@ html,body{
     <div class="screen" id="screen-c2g">
       <div class="section-label">Input Mode</div>
       <div class="mode-toggle">
-        <button class="mode-btn active" id="mode-dec" onclick="setMode('dec')">Decimal °</button>
-        <button class="mode-btn" id="mode-dms" onclick="setMode('dms')">DMS</button>
+        <button class="mode-btn" id="mode-dec" onclick="setMode('dec')">Decimal °</button>
+        <button class="mode-btn active" id="mode-dms" onclick="setMode('dms')">DMS</button>
       </div>
 
-      <div id="dec-inputs">
+      <div id="dec-inputs" style="display:none">
         <div class="section-label">Decimal Degrees Input</div>
         <div class="field-group">
           <div class="field">
@@ -891,7 +896,7 @@ html,body{
         <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">Enter latitude as positive South value · e.g. 1.523144 = 01°31'23.3"S</div>
       </div>
 
-      <div id="dms-inputs" style="display:none">
+      <div id="dms-inputs" style="display:block">
         <div class="section-label">Latitude (S)</div>
         <div class="field-group">
           <div class="dms-row">
@@ -1380,6 +1385,7 @@ function validateGeo(latS,lonE){if(latS<activeSheet.latS_min||latS>activeSheet.l
 function dms2dec(d,m,s){return d+m/60+s/3600;}
 function dec2dms(dec){dec=Math.abs(dec);const d=Math.floor(dec),mFull=(dec-d)*60,m=Math.floor(mFull),s=(mFull-m)*60;return{d,m,s};}
 function fmtDMS(d,m,s,hemi,decimals=3){const ss=s.toFixed(decimals);return`${String(d).padStart(2,'0')}°${String(m).padStart(2,'0')}'${ss.padStart(decimals+3,'0')}"${hemi}`;}
+function renderDmsOutput(d,m,s,hemi,decimals=3){const deg=String(d).padStart(2,'0');const min=String(m).padStart(2,'0');const sec=s.toFixed(decimals);return`<div class="dms-output-group"><div class="dms-output-box">${deg}<span class="dms-output-unit">°</span></div><div class="dms-output-box">${min}<span class="dms-output-unit">'</span></div><div class="dms-output-box">${sec}<span class="dms-output-unit">"</span></div><div class="dms-output-hemisphere">${hemi}</div></div>`;}
 function doGridToGeo(gridStr){if(!/^\d{6}$/.test(gridStr))throw new Error('Must be exactly 6 digits');const gE=parseInt(gridStr.slice(0,3),10),gN=parseInt(gridStr.slice(3,6),10);validateGrid(gE,gN);const{stdE,stdN}=gridToStdTM(gE,gN),{latDeg,lonDeg}=tmStd_toGeo(stdE,stdN),latS=-latDeg,latDMS=dec2dms(latS),lonDMS=dec2dms(lonDeg);return{latS,lonDeg,latDMS,lonDMS,gE,gN,stdE,stdN,gridRef:gridStr};}
 function doGeoToGrid(latS,lonE){validateGeo(latS,lonE);const{stdE,stdN}=geoToTM_std(-latS,lonE),{gE:gE_raw,gN:gN_raw}=stdTMtoGrid(stdE,stdN),gE=Math.round(gE_raw),gN=Math.round(gN_raw);validateGrid(gE,gN);const gridRef=String(gE).padStart(3,'0')+String(gN).padStart(3,'0'),latDMS=dec2dms(latS),lonDMS=dec2dms(lonE);return{gridRef,gE,gN,gE_raw,gN_raw,stdE,stdN,latS,lonE,latDMS,lonDMS};}
 function doGridToGeoOnSheet(gridStr,sheet){
@@ -2332,7 +2338,7 @@ function generateReport(){
 }
 
 // ── CONVERTERS ──
-let currentMode='dec';
+let currentMode='dms';
 function setMode(m){currentMode=m;document.getElementById('dec-inputs').style.display=m==='dec'?'':'none';document.getElementById('dms-inputs').style.display=m==='dms'?'':'none';document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));document.getElementById(`mode-${m}`).classList.add('active');}
 function clearErr(t){const el=document.getElementById(`${t}-err`);el.textContent='';el.classList.remove('show');}
 function showErr(t,msg){const el=document.getElementById(`${t}-err`);el.textContent='⚠ '+msg;el.classList.add('show');}
@@ -2342,8 +2348,8 @@ function convertGrid(){
     const v=document.getElementById('grid-input').value.trim();
     const r=resolveGridReference(v);
     if(r.sheet.id!==activeSheet.id)selectSheet(r.sheet.id);
-    document.getElementById('out-lat-dms').textContent=fmtDMS(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S');
-    document.getElementById('out-lon-dms').textContent=fmtDMS(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E');
+    document.getElementById('out-lat-dms').innerHTML=renderDmsOutput(r.latDMS.d,r.latDMS.m,r.latDMS.s,'S');
+    document.getElementById('out-lon-dms').innerHTML=renderDmsOutput(r.lonDMS.d,r.lonDMS.m,r.lonDMS.s,'E');
     document.getElementById('out-lat-dec').textContent=`-${r.latS.toFixed(8)}°`;
     document.getElementById('out-lon-dec').textContent=`${r.lon.toFixed(8)}°`;
     if(userLatLng){const km=distanceBetween(userLatLng.lat,userLatLng.lng,r.lat,r.lon);document.getElementById('out-distance').textContent=formatDistance(km);}else{document.getElementById('out-distance').textContent='—';}

@@ -9,6 +9,8 @@
 <meta name="theme-color" content="#0a0c0a">
 <link rel="manifest" href="./manifest.json">
 <link rel="stylesheet" href="./leaflet.css" />
+<script defer src="./leaflet.js"></script>
+<script defer src="./offline-map-layer.js"></script>
 <title>Rwanda Grid Converter</title>
 <style>
 :root {
@@ -2543,7 +2545,5 @@ window.addEventListener('load',()=>{
   if(dEl)dEl.textContent=`${latStr} · ${lonStr}`;
 });
 </script>
-<script src="./leaflet.js"></script>
-<script src="./offline-map-layer.js"></script>
 </body>
 </html>

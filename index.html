@@ -982,6 +982,9 @@ html,body{
         <button class="map-icon-btn map-locate-btn" id="btn-locate" onclick="ensureUserLocation({quiet:false,centerOnFound:true,zoom:15})" title="Center on my location">
           <span class="map-btn-icon">⊙</span><span class="map-btn-text">Me</span>
         </button>
+        <button class="map-icon-btn" id="btn-req-location" onclick="requestLocationPrompt()" title="Request location access">
+          <span class="map-btn-icon">📡</span><span class="map-btn-text">Loc req</span>
+        </button>
         <button class="map-icon-btn map-ruler-btn" id="btn-ruler" onclick="toggleRuler()" title="Measure from live location">
           <span class="map-btn-icon">📏</span><span class="map-btn-text">Ruler</span>
         </button>
@@ -995,6 +998,12 @@ html,body{
           <span class="map-btn-icon">🧭</span><span class="map-btn-text">Nav</span>
         </button>
 
+      </div>
+
+      <!-- Permission hint (appears when location is blocked) -->
+      <div id="map-perm-hint" style="position:absolute;left:14px;bottom:14px;z-index:450;display:none;padding:8px 10px;border-radius:10px;background:rgba(7,10,7,.95);border:1px solid rgba(255,183,48,.18);color:#ffb830;font-family:var(--mono);font-size:11px;letter-spacing:.6px">
+        <span id="map-perm-text">Location access is blocked. Enable to use live location.</span>
+        <button id="map-perm-action" style="margin-left:8px;padding:6px 8px;border-radius:8px;background:transparent;border:1px solid rgba(255,183,48,.15);color:#ffb830;font-family:var(--mono);font-size:11px;cursor:pointer">Enable</button>
       </div>
 
       <div class="map-toolbar">
@@ -1519,6 +1528,8 @@ function switchScreen(name){
     initMap();
     setTimeout(()=>{if(map)map.invalidateSize();},180);
     setTimeout(()=>{if(map)map.invalidateSize();},450);
+    // Check geolocation permission and prompt if appropriate (GitHub Pages needs HTTPS)
+    try{checkGeolocationPermissionAndRequest();}catch(e){}
   }
   if(name==='compass'){
     startUserLocationWatch({quiet:true});
@@ -2539,6 +2550,73 @@ window.addEventListener('load',()=>{
   const dEl=document.getElementById('topo-ref-dms');
   if(dEl)dEl.textContent=`${latStr} · ${lonStr}`;
 });
+
+// Geolocation permission helpers
+function showMapPermHint(text,showButton=true){
+  const el=document.getElementById('map-perm-hint');
+  if(!el)return;el.style.display='inline-flex';document.getElementById('map-perm-text').textContent=text;const btn=document.getElementById('map-perm-action');btn.style.display=showButton?'inline-block':'none';
+  btn.onclick=()=>{
+    ensureUserLocation({quiet:false,centerOnFound:true,zoom:15});
+    el.style.display='none';
+  };
+}
+function hideMapPermHint(){const el=document.getElementById('map-perm-hint');if(el)el.style.display='none';}
+
+async function checkGeolocationPermissionAndRequest(){
+  if(!('geolocation' in navigator))return;
+  // If Permissions API available, check first
+  if(navigator.permissions && navigator.permissions.query){
+    try{
+      const p = await navigator.permissions.query({name:'geolocation'});
+      if(p.state==='granted'){ hideMapPermHint(); ensureUserLocation({quiet:true,centerOnFound:false}); }
+      else if(p.state==='prompt'){ hideMapPermHint(); ensureUserLocation({quiet:false,centerOnFound:false}); }
+      else if(p.state==='denied'){ showMapPermHint('Location access is blocked in your browser. Enable it in site settings.',false); }
+      p.onchange = ()=>{ checkGeolocationPermissionAndRequest(); };
+      return;
+    }catch(e){/* ignore and fallback */}
+  }
+  // Fallback: directly attempt to request location which will trigger prompt on supported hosts
+  try{ ensureUserLocation({quiet:false,centerOnFound:false}); hideMapPermHint(); }catch(e){}
+}
+
+// Explicit request button handler — shows prompt or advice depending on permission state
+async function requestLocationPrompt(){
+  if(!('geolocation' in navigator)){
+    alert('Geolocation is not supported by this browser.');
+    return;
+  }
+  if(navigator.permissions && navigator.permissions.query){
+    try{
+      const p = await navigator.permissions.query({name:'geolocation'});
+      if(p.state==='granted'){
+        ensureUserLocation({quiet:true,centerOnFound:true,zoom:15}); hideMapPermHint();
+      }else if(p.state==='prompt'){
+        // Trigger prompt
+        ensureUserLocation({quiet:false,centerOnFound:true,zoom:15}); hideMapPermHint();
+      }else if(p.state==='denied'){
+        // Guide user to browser settings
+        showMapPermHint('Location access is blocked. Please enable it in your browser site settings.',false);
+      }
+      return;
+    }catch(e){/* fallback to direct request */}
+  }
+  // Fallback: direct request
+  try{ ensureUserLocation({quiet:false,centerOnFound:true,zoom:15}); hideMapPermHint(); }catch(e){alert('Unable to request location: '+e.message);} 
+}
+
+// Service worker update notification
+if(navigator.serviceWorker){
+  navigator.serviceWorker.addEventListener('message',e=>{
+    if(e.data && e.data.type==='sw-activated'){
+      // show a small non-blocking toast with Reload button
+      const id='sw-update-toast'; if(document.getElementById(id))return;
+      const t=document.createElement('div'); t.id=id; t.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:9999;padding:10px 12px;border-radius:10px;background:rgba(6,8,6,.98);border:1px solid rgba(57,255,106,.14);color:var(--accent);font-family:var(--mono);font-size:12px;display:flex;gap:10px;align-items:center;';
+      t.innerHTML=`App updated — <button id="sw-reload-btn" style="margin-left:8px;padding:6px 8px;border-radius:8px;background:transparent;border:1px solid rgba(57,255,106,.12);color:var(--accent);font-family:var(--mono);cursor:pointer">Reload</button>`;
+      document.body.appendChild(t);
+      document.getElementById('sw-reload-btn').onclick=()=>location.reload(true);
+    }
+  });
+}
 </script>
 </body>
 </html>
